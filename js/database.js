@@ -46,7 +46,7 @@ const DB = {
 
   async getUserById(id) {
     try {
-      const response = await fetch(`${API_BASE}/users/${id}`);
+      const response = await fetch(`${API_BASE}/users?id=${id}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get user:', error);
@@ -56,7 +56,7 @@ const DB = {
 
   async getUserByUsername(username) {
     try {
-      const response = await fetch(`${API_BASE}/users/username/${username}`);
+      const response = await fetch(`${API_BASE}/users?username=${username}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get user:', error);
@@ -80,7 +80,7 @@ const DB = {
 
   async updateUser(id, updates) {
     try {
-      const response = await fetch(`${API_BASE}/users/${id}`, {
+      const response = await fetch(`${API_BASE}/users?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
@@ -94,7 +94,7 @@ const DB = {
 
   async deleteUser(id) {
     try {
-      await fetch(`${API_BASE}/users/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/users?id=${id}`, { method: 'DELETE' });
     } catch (error) {
       console.error('Failed to delete user:', error);
     }
@@ -116,7 +116,7 @@ const DB = {
 
   async getProductById(id) {
     try {
-      const response = await fetch(`${API_BASE}/products/${id}`);
+      const response = await fetch(`${API_BASE}/products?id=${id}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get product:', error);
@@ -126,7 +126,7 @@ const DB = {
 
   async searchProducts(query) {
     try {
-      const response = await fetch(`${API_BASE}/products/search/${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_BASE}/products?query=${encodeURIComponent(query)}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to search products:', error);
@@ -150,7 +150,7 @@ const DB = {
 
   async updateProduct(id, updates) {
     try {
-      const response = await fetch(`${API_BASE}/products/${id}`, {
+      const response = await fetch(`${API_BASE}/products?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
@@ -164,7 +164,7 @@ const DB = {
 
   async deleteProduct(id) {
     try {
-      await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/products?id=${id}`, { method: 'DELETE' });
     } catch (error) {
       console.error('Failed to delete product:', error);
     }
@@ -185,7 +185,7 @@ const DB = {
 
   async getLowStockProducts() {
     try {
-      const response = await fetch(`${API_BASE}/products/lowstock/all`);
+      const response = await fetch(`${API_BASE}/products?lowstock=true`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get low stock products:', error);
@@ -209,7 +209,7 @@ const DB = {
 
   async getBillById(id) {
     try {
-      const response = await fetch(`${API_BASE}/bills/${id}`);
+      const response = await fetch(`${API_BASE}/bills?id=${id}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get bill:', error);
@@ -219,7 +219,7 @@ const DB = {
 
   async getNextInvoiceNumber() {
     try {
-      const response = await fetch(`${API_BASE}/bills/invoice/next`);
+      const response = await fetch(`${API_BASE}/bills?nextInvoice=true`);
       const data = await response.json();
       return data.invoiceNo;
     } catch (error) {
@@ -245,7 +245,7 @@ const DB = {
 
   async getBillsByDateRange(startDate, endDate) {
     try {
-      const response = await fetch(`${API_BASE}/bills/range/${startDate}/${endDate}`);
+      const response = await fetch(`${API_BASE}/bills?startDate=${startDate}&endDate=${endDate}`);
       return await response.json();
     } catch (error) {
       console.error('Failed to get bills by date range:', error);
