@@ -1,6 +1,8 @@
 # Retail Shop Pro - PostgreSQL Edition
 
-A modern retail shop management system with billing, inventory, GST calculations, and comprehensive reporting. Now powered by PostgreSQL for serverless deployment on Vercel.
+A modern retail shop management system with billing, inventory, GST calculations, and comprehensive reporting. Powered by PostgreSQL for serverless deployment on Vercel.
+
+🚀 **Live Demo**: [https://gravity-1-three.vercel.app](https://gravity-1-three.vercel.app)
 
 ## 🚀 Features
 
@@ -15,57 +17,24 @@ A modern retail shop management system with billing, inventory, GST calculations
 ## 🛠️ Tech Stack
 
 - **Frontend**: HTML, CSS, JavaScript (Vanilla)
-- **Backend**: Node.js with Express (Serverless Functions)
-- **Database**: PostgreSQL (Vercel Postgres)
+- **Backend**: Vercel Serverless Functions
+- **Database**: PostgreSQL (Vercel Postgres powered by Neon)
 - **Deployment**: Vercel
 - **PDF Generation**: jsPDF library
 
-## 📦 Installation
+## 📦 Quick Start
 
-### For Vercel Deployment (Recommended)
+### Deploy to Vercel
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Vercel deployment instructions.
+1. Fork this repository
+2. Import to Vercel
+3. Add Vercel Postgres database
+4. Initialize schema (see [DEPLOYMENT.md](DEPLOYMENT.md))
+5. Done! 🎉
 
-### For Local Development
+### Local Development
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/svivekkumaran/Gravity-1.git
-   cd Gravity-1
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up Vercel Postgres** (for local development)
-   ```bash
-   # Install Vercel CLI
-   npm i -g vercel
-   
-   # Login and link project
-   vercel login
-   vercel link
-   
-   # Pull environment variables
-   vercel env pull .env.local
-   ```
-
-4. **Initialize database**
-   ```bash
-   node -e "require('./lib/db').initializeDatabase()"
-   ```
-
-5. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed setup instructions.
 
 ## 🔐 Default Credentials
 
@@ -74,105 +43,22 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Vercel deployment instructions.
 
 **⚠️ Change these passwords in production!**
 
-## 📁 Project Structure
+## 📚 Documentation
 
-```
-Gravity-1/
-├── api/                    # Vercel serverless functions
-│   ├── users/             # User management endpoints
-│   ├── products/          # Product management endpoints
-│   ├── bills/             # Billing endpoints
-│   ├── settings/          # Settings endpoints
-│   ├── export.js          # Data export
-│   ├── import.js          # Data import
-│   └── clear.js           # Clear data
-├── lib/
-│   └── db.js              # PostgreSQL connection & utilities
-├── js/
-│   ├── auth.js            # Authentication logic
-│   ├── billing.js         # Billing functionality
-│   ├── database.js        # API client
-│   ├── products.js        # Product management
-│   ├── reports.js         # Report generation
-│   ├── pdf.js             # PDF generation
-│   └── utils.js           # Utility functions
-├── admin.html             # Admin dashboard
-├── billing.html           # Billing page
-├── index.html             # Login page
-├── schema.sql             # PostgreSQL schema
-├── vercel.json            # Vercel configuration
-├── DEPLOYMENT.md          # Deployment guide
-└── README.md              # This file
-```
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide
+- **[schema.sql](schema.sql)** - Database schema
 
 ## 🌐 API Endpoints
 
-All endpoints are available at `/api/`:
+All endpoints are serverless functions in `/api/`:
 
-- **Users**: `/api/users`, `/api/users/[id]`, `/api/users/username/[username]`
-- **Products**: `/api/products`, `/api/products/[id]`, `/api/products/search/[query]`, `/api/products/lowstock/all`
-- **Bills**: `/api/bills`, `/api/bills/[id]`, `/api/bills/range`, `/api/bills/invoice/next`
-- **Settings**: `/api/settings`
-- **Utilities**: `/api/export`, `/api/import`, `/api/clear`
-
-## 🔧 Environment Variables
-
-Required environment variables (automatically set by Vercel):
-
-```env
-POSTGRES_URL="postgres://..."
-POSTGRES_PRISMA_URL="postgres://..."
-POSTGRES_URL_NON_POOLING="postgres://..."
-```
-
-See `.env.example` for the complete list.
-
-## 📊 Database Schema
-
-The application uses PostgreSQL with the following tables:
-
-- `users` - User accounts and authentication
-- `products` - Product inventory
-- `bills` - Sales transactions
-- `settings` - Company settings
-
-See `schema.sql` for the complete schema definition.
-
-## 🚢 Deployment
-
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add Vercel Postgres database
-4. Deploy!
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
-
-## 📝 Migration from SQLite
-
-If you're migrating from the SQLite version:
-
-1. Export your data from the old version (Settings → Export Backup)
-2. Deploy the new PostgreSQL version
-3. Import your data (Settings → Import Backup)
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
-- Verify environment variables are set
-- Check Vercel Postgres dashboard for database status
-- Ensure schema is initialized
-
-### API Errors
-- Check Vercel function logs
-- Verify CORS settings in `vercel.json`
-- Check browser console for errors
-
-### Build Failures
-- Ensure all dependencies are in `package.json`
-- Check Vercel build logs
-- Verify Node.js version compatibility
+- `GET/POST /api/users` - User management
+- `GET/POST /api/products` - Product management
+- `GET/POST /api/bills` - Billing operations
+- `GET/PUT /api/settings` - Settings
+- `GET /api/export` - Data export
+- `POST /api/import` - Data import
+- `POST /api/clear` - Clear data
 
 ## 📄 License
 
@@ -182,8 +68,6 @@ ISC
 
 Vivek Kumaran
 
-## 🙏 Acknowledgments
+---
 
-- Built with modern web technologies
-- Deployed on Vercel's edge network
-- Powered by PostgreSQL for reliability and scalability
+Built with ❤️ using modern web technologies and deployed on Vercel's edge network.
