@@ -13,8 +13,15 @@
 
 <body>
     <div class="dashboard-grid">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="navbar-brand" style="margin-bottom: 2rem;">🛒 Retail Shop</div>
 
             <ul class="sidebar-menu">
@@ -563,6 +570,14 @@
                     }, 1500);
                 }
             );
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            sidebar.classList.toggle('active');
+            menuBtn.classList.toggle('active');
         }
 
         // Initialize dashboard on load
