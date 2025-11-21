@@ -1,101 +1,189 @@
-# Retail Shop Pro - Setup Guide
+# Retail Shop Pro - PostgreSQL Edition
 
-## Overview
-Retail Shop Pro is a professional billing and inventory management system with SQLite database backend.
+A modern retail shop management system with billing, inventory, GST calculations, and comprehensive reporting. Now powered by PostgreSQL for serverless deployment on Vercel.
 
-## Prerequisites
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
+## 🚀 Features
 
-## Installation
+- **User Authentication**: Role-based access (Admin & Billing)
+- **Product Management**: Add, edit, delete products with stock tracking
+- **Billing System**: Generate GST-compliant invoices with PDF export
+- **Inventory Tracking**: Real-time stock updates and low-stock alerts
+- **Reports**: Sales, stock, and GST reports with date range filtering
+- **Data Management**: Export/import functionality for backups
+- **Responsive Design**: Works on desktop and mobile devices
 
-### 1. Install Dependencies
-```bash
-npm install
+## 🛠️ Tech Stack
+
+- **Frontend**: HTML, CSS, JavaScript (Vanilla)
+- **Backend**: Node.js with Express (Serverless Functions)
+- **Database**: PostgreSQL (Vercel Postgres)
+- **Deployment**: Vercel
+- **PDF Generation**: jsPDF library
+
+## 📦 Installation
+
+### For Vercel Deployment (Recommended)
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Vercel deployment instructions.
+
+### For Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/svivekkumaran/Gravity-1.git
+   cd Gravity-1
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Vercel Postgres** (for local development)
+   ```bash
+   # Install Vercel CLI
+   npm i -g vercel
+   
+   # Login and link project
+   vercel login
+   vercel link
+   
+   # Pull environment variables
+   vercel env pull .env.local
+   ```
+
+4. **Initialize database**
+   ```bash
+   node -e "require('./lib/db').initializeDatabase()"
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open in browser**
+   ```
+   http://localhost:3000
+   ```
+
+## 🔐 Default Credentials
+
+- **Admin**: `admin` / `admin123`
+- **Billing**: `billing` / `billing123`
+
+**⚠️ Change these passwords in production!**
+
+## 📁 Project Structure
+
+```
+Gravity-1/
+├── api/                    # Vercel serverless functions
+│   ├── users/             # User management endpoints
+│   ├── products/          # Product management endpoints
+│   ├── bills/             # Billing endpoints
+│   ├── settings/          # Settings endpoints
+│   ├── export.js          # Data export
+│   ├── import.js          # Data import
+│   └── clear.js           # Clear data
+├── lib/
+│   └── db.js              # PostgreSQL connection & utilities
+├── js/
+│   ├── auth.js            # Authentication logic
+│   ├── billing.js         # Billing functionality
+│   ├── database.js        # API client
+│   ├── products.js        # Product management
+│   ├── reports.js         # Report generation
+│   ├── pdf.js             # PDF generation
+│   └── utils.js           # Utility functions
+├── admin.html             # Admin dashboard
+├── billing.html           # Billing page
+├── index.html             # Login page
+├── schema.sql             # PostgreSQL schema
+├── vercel.json            # Vercel configuration
+├── DEPLOYMENT.md          # Deployment guide
+└── README.md              # This file
 ```
 
-This will install:
-- `express` - Web server framework
-- `better-sqlite3` - SQLite database driver
-- `cors` - Cross-origin resource sharing
-- `bcrypt` - Password hashing (for future use)
+## 🌐 API Endpoints
 
-### 2. Start the Server
-```bash
-npm start
+All endpoints are available at `/api/`:
+
+- **Users**: `/api/users`, `/api/users/[id]`, `/api/users/username/[username]`
+- **Products**: `/api/products`, `/api/products/[id]`, `/api/products/search/[query]`, `/api/products/lowstock/all`
+- **Bills**: `/api/bills`, `/api/bills/[id]`, `/api/bills/range`, `/api/bills/invoice/next`
+- **Settings**: `/api/settings`
+- **Utilities**: `/api/export`, `/api/import`, `/api/clear`
+
+## 🔧 Environment Variables
+
+Required environment variables (automatically set by Vercel):
+
+```env
+POSTGRES_URL="postgres://..."
+POSTGRES_PRISMA_URL="postgres://..."
+POSTGRES_URL_NON_POOLING="postgres://..."
 ```
 
-The server will start on `http://localhost:3000`
+See `.env.example` for the complete list.
 
-### 3. Access the Application
-Open your browser and navigate to:
-```
-http://localhost:3000
-```
+## 📊 Database Schema
 
-## Default Credentials
+The application uses PostgreSQL with the following tables:
 
-**Admin Account:**
-- Username: `admin`
-- Password: `admin123`
+- `users` - User accounts and authentication
+- `products` - Product inventory
+- `bills` - Sales transactions
+- `settings` - Company settings
 
-**Billing Account:**
-- Username: `billing`
-- Password: `billing123`
+See `schema.sql` for the complete schema definition.
 
-## Migrating from localStorage
+## 🚢 Deployment
 
-If you have existing data in localStorage from the previous version:
+### Deploy to Vercel
 
-1. **Export your data** from the old version:
-   - Login as admin
-   - Go to Settings
-   - Click "Export Backup"
-   - Save the JSON file
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Add Vercel Postgres database
+4. Deploy!
 
-2. **Import into new system**:
-   - Start the new server
-   - Login as admin
-   - Go to Settings
-   - Click "Import Backup"
-   - Select your saved JSON file
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
-## Features
+## 📝 Migration from SQLite
 
-- ✅ User authentication with role-based access
-- ✅ Product management with stock tracking
-- ✅ GST-compliant billing
-- ✅ PDF invoice generation
-- ✅ Sales and inventory reports
-- ✅ Data backup and restore
-- ✅ SQLite database for persistent storage
+If you're migrating from the SQLite version:
 
-## Database
+1. Export your data from the old version (Settings → Export Backup)
+2. Deploy the new PostgreSQL version
+3. Import your data (Settings → Import Backup)
 
-The application uses SQLite database stored in `database.sqlite` file. This file is automatically created when you first run the server.
+## 🐛 Troubleshooting
 
-## Troubleshooting
+### Database Connection Issues
+- Verify environment variables are set
+- Check Vercel Postgres dashboard for database status
+- Ensure schema is initialized
 
-### Port Already in Use
-If port 3000 is already in use, you can change it in `server.js`:
-```javascript
-const PORT = 3000; // Change this to another port
-```
+### API Errors
+- Check Vercel function logs
+- Verify CORS settings in `vercel.json`
+- Check browser console for errors
 
-### Database Issues
-If you encounter database issues, you can delete `database.sqlite` and restart the server. This will create a fresh database with default data.
+### Build Failures
+- Ensure all dependencies are in `package.json`
+- Check Vercel build logs
+- Verify Node.js version compatibility
 
-### Connection Errors
-Make sure the server is running before accessing the application in your browser.
+## 📄 License
 
-## Development
+ISC
 
-To run in development mode with auto-reload (requires nodemon):
-```bash
-npm install -g nodemon
-nodemon server.js
-```
+## 👤 Author
 
-## Support
+Vivek Kumaran
 
-For issues or questions, please check the application logs in the terminal where the server is running.
+## 🙏 Acknowledgments
+
+- Built with modern web technologies
+- Deployed on Vercel's edge network
+- Powered by PostgreSQL for reliability and scalability

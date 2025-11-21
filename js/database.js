@@ -1,8 +1,11 @@
 // ============================================
-// DATABASE MODULE - SQLite API Management
+// DATABASE MODULE - PostgreSQL API Client
 // ============================================
 
-const API_BASE = 'http://localhost:3000/api';
+// Auto-detect API base URL based on environment
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000/api'
+  : '/api';
 
 const DB = {
   // Initialize database (now handled by server)
