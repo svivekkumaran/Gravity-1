@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Retail Shop Pro</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="glass-card login-card">
+      <div class="login-header">
+        <div class="login-logo">🛒</div>
+        <h1>Karthick Agency</h1>
+        <p class="text-muted">Professional Billing & Inventory Management</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="username" placeholder="Enter username" required
+            autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="password" placeholder="Enter password" required
+            autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Login
+        </button>
+      </form>
+
+      <div class="mt-4"
+        style="padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: var(--radius-md); border-left: 4px solid var(--primary);">
+        <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+          <strong>Demo Credentials:</strong><br>
+          Admin: <code
+            style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">admin / admin123</code><br>
+          Billing: <code
+            style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">billing / billing123</code>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/database.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    // Check if already logged in
+    if (Auth.isLoggedIn()) {
+      const user = Auth.getCurrentUser();
+      if (user.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'billing.html';
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const result = await Auth.login(username, password);
+
+      if (result.success) {
+        showToast('Login successful! Redirecting...', 'success');
+
+        setTimeout(() => {
+          if (result.user.role === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'billing.html';
+          }
+        }, 1000);
+      } else {
+        showToast(result.message, 'error');
+      }
+    }
+  </script>
+</body>
+
+</html>
