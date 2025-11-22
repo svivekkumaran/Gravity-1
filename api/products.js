@@ -1,5 +1,17 @@
 const db = require('../lib/db');
 
+// Helper function to convert snake_case to camelCase
+function toCamelCase(obj) {
+    if (!obj) return obj;
+
+    const camelCaseObj = {};
+    for (const key in obj) {
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        camelCaseObj[camelKey] = obj[key];
+    }
+    return camelCaseObj;
+}
+
 module.exports = async (req, res) => {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,7 +32,7 @@ module.exports = async (req, res) => {
         if (req.method === 'GET') {
             if (id) {
                 const product = await db.queryOne('SELECT * FROM products WHERE id = $1', [id]);
-                return res.json(product);
+                return res.json(toCamelCase(product));
             }
 
             if (query) {
@@ -29,18 +41,18 @@ module.exports = async (req, res) => {
                     'SELECT * FROM products WHERE LOWER(name) LIKE $1 OR LOWER(category) LIKE $1 ORDER BY name',
                     [searchPattern]
                 );
-                return res.json(products);
+                return res.json(products.map(toCamelCase));
             }
 
             if (lowstock === 'true') {
                 const products = await db.queryAll(
                     'SELECT * FROM products WHERE stock <= min_stock ORDER BY stock ASC'
                 );
-                return res.json(products);
+                return res.json(products.map(toCamelCase));
             }
 
             const products = await db.queryAll('SELECT * FROM products ORDER BY name');
-            return res.json(products);
+            return res.json(products.map(toCamelCase));
         }
 
         // POST /api/products - Create new product
@@ -54,7 +66,7 @@ module.exports = async (req, res) => {
             );
 
             const newProduct = await db.queryOne('SELECT * FROM products WHERE id = $1', [productId]);
-            return res.json(newProduct);
+            return res.json(toCamelCase(newProduct));
         }
 
         // PUT /api/products?id=xxx - Update product
@@ -83,7 +95,7 @@ module.exports = async (req, res) => {
             );
 
             const updatedProduct = await db.queryOne('SELECT * FROM products WHERE id = $1', [id]);
-            return res.json(updatedProduct);
+            return res.json(toCamelCase(updatedProduct));
         }
 
         // DELETE /api/products?id=xxx - Delete product

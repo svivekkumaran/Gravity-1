@@ -1,5 +1,17 @@
 const db = require('../lib/db');
 
+// Helper function to convert snake_case to camelCase
+function toCamelCase(obj) {
+    if (!obj) return obj;
+
+    const camelCaseObj = {};
+    for (const key in obj) {
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        camelCaseObj[camelKey] = obj[key];
+    }
+    return camelCaseObj;
+}
+
 module.exports = async (req, res) => {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,7 +26,7 @@ module.exports = async (req, res) => {
         if (req.method === 'GET') {
             // Get settings
             const settings = await db.queryOne('SELECT * FROM settings WHERE id = 1');
-            return res.json(settings);
+            return res.json(toCamelCase(settings));
         }
 
         if (req.method === 'PUT') {
@@ -27,7 +39,7 @@ module.exports = async (req, res) => {
             );
 
             const settings = await db.queryOne('SELECT * FROM settings WHERE id = 1');
-            return res.json(settings);
+            return res.json(toCamelCase(settings));
         }
 
         return res.status(405).json({ error: 'Method not allowed' });

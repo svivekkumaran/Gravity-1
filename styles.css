@@ -839,15 +839,22 @@ p {
   overflow-y: auto;
 }
 
+/* Add padding-top for mobile to prevent menu button overlap */
+@media (max-width: 1024px) {
+  .main-content {
+    padding-top: 80px;
+  }
+}
+
 /* ============================================
    MOBILE MENU BUTTON
    ============================================ */
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  top: 1rem;
+  top: 1.5rem;
   left: 1rem;
-  z-index: 1000;
+  z-index: 1001;
   background: var(--primary-gradient);
   border: none;
   border-radius: var(--radius-md);
@@ -913,7 +920,7 @@ p {
   margin-top: var(--spacing-xs);
   max-height: 300px;
   overflow-y: auto;
-  z-index: 10;
+  z-index: 100;
   box-shadow: var(--shadow-lg);
 }
 
