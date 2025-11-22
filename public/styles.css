@@ -913,7 +913,7 @@ p {
   margin-top: var(--spacing-xs);
   max-height: 300px;
   overflow-y: auto;
-  z-index: 10;
+  z-index: 1001;
   box-shadow: var(--shadow-lg);
 }
 
