@@ -1,5 +1,17 @@
 const db = require('../lib/db');
 
+// Helper function to convert snake_case to camelCase
+function toCamelCase(obj) {
+    if (!obj) return obj;
+
+    const camelCaseObj = {};
+    for (const key in obj) {
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        camelCaseObj[camelKey] = obj[key];
+    }
+    return camelCaseObj;
+}
+
 module.exports = async (req, res) => {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,7 +32,7 @@ module.exports = async (req, res) => {
         if (req.method === 'GET') {
             if (id) {
                 const bill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [id]);
-                return res.json(bill);
+                return res.json(toCamelCase(bill));
             }
 
             if (nextInvoice === 'true') {
@@ -42,11 +54,11 @@ module.exports = async (req, res) => {
                     'SELECT * FROM bills WHERE date >= $1 AND date <= $2 ORDER BY date DESC',
                     [startDateTime, endDateTime]
                 );
-                return res.json(bills);
+                return res.json(bills.map(toCamelCase));
             }
 
             const bills = await db.queryAll('SELECT * FROM bills ORDER BY date DESC');
-            return res.json(bills);
+            return res.json(bills.map(toCamelCase));
         }
 
         // POST /api/bills - Create new bill
@@ -78,7 +90,7 @@ module.exports = async (req, res) => {
             );
 
             const newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);
-            return res.json(newBill);
+            return res.json(toCamelCase(newBill));
         }
 
         return res.status(405).json({ error: 'Method not allowed' });
