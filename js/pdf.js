@@ -4,14 +4,21 @@
 // ============================================
 
 const PDFGenerator = {
-    // Generate invoice PDF
-    generateInvoice(bill) {
-        // Create a new window for printing
-        const printWindow = window.open('', '_blank');
+  // Generate invoice PDF
+  async generateInvoice(bill) {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
 
-        const settings = DB.getSettings();
+    const settings = await DB.getSettings();
 
-        const invoiceHTML = `
+    // Provide fallback values to prevent "undefined" in PDF
+    const companyName = settings.companyName || 'Your Company Name';
+    const address = settings.address || 'Company Address';
+    const gstin = settings.gstin || 'GSTIN Number';
+    const phone = settings.phone || 'Phone Number';
+    const email = settings.email || 'Email Address';
+
+    const invoiceHTML = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -183,11 +190,11 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            <div class="company-name">${settings.companyName}</div>
+            <div class="company-name">${companyName}</div>
             <div class="company-details">
-              ${settings.address}<br>
-              GSTIN: ${settings.gstin} | Phone: ${settings.phone}<br>
-              Email: ${settings.email}
+              ${address}<br>
+              GSTIN: ${gstin} | Phone: ${phone}<br>
+              Email: ${email}
             </div>
           </div>
           
@@ -227,11 +234,11 @@ const PDFGenerator = {
             </thead>
             <tbody>
               ${bill.items.map((item, index) => {
-            const itemSubtotal = item.price * item.qty;
-            const gst = calculateGST(itemSubtotal, item.gstRate);
-            const itemTotal = itemSubtotal + gst.total;
+      const itemSubtotal = item.price * item.qty;
+      const gst = calculateGST(itemSubtotal, item.gstRate);
+      const itemTotal = itemSubtotal + gst.total;
 
-            return `
+      return `
                   <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
@@ -242,7 +249,7 @@ const PDFGenerator = {
                     <td class="text-right"><strong>${formatCurrency(itemTotal)}</strong></td>
                   </tr>
                 `;
-        }).join('')}
+    }).join('')}
             </tbody>
           </table>
           
@@ -302,7 +309,7 @@ const PDFGenerator = {
       </html>
     `;
 
-        printWindow.document.write(invoiceHTML);
-        printWindow.document.close();
-    }
+    printWindow.document.write(invoiceHTML);
+    printWindow.document.close();
+  }
 };

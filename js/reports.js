@@ -14,10 +14,10 @@ const ReportsManager = {
         let totalBills = bills.length;
 
         bills.forEach(bill => {
-            totalSales += bill.total;
-            totalCGST += bill.cgst || 0;
-            totalSGST += bill.sgst || 0;
-            totalGST += (bill.cgst || 0) + (bill.sgst || 0);
+            totalSales += parseFloat(bill.total) || 0;
+            totalCGST += parseFloat(bill.cgst) || 0;
+            totalSGST += parseFloat(bill.sgst) || 0;
+            totalGST += (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
         });
 
         return {

@@ -417,6 +417,14 @@
             // Add active class to clicked link
             event.target.classList.add('active');
 
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            if (sidebar && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                if (menuBtn) menuBtn.classList.remove('active');
+            }
+
             // Load section data
             if (sectionId === 'dashboard') loadDashboard();
             if (sectionId === 'products') ProductManager.renderProductsTable();
