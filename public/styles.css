@@ -839,15 +839,22 @@ p {
   overflow-y: auto;
 }
 
+/* Add padding-top for mobile to prevent menu button overlap */
+@media (max-width: 1024px) {
+  .main-content {
+    padding-top: 80px;
+  }
+}
+
 /* ============================================
    MOBILE MENU BUTTON
    ============================================ */
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1000;
+  top: 1.5rem;
+  right: 1rem;
+  z-index: 1001;
   background: var(--primary-gradient);
   border: none;
   border-radius: var(--radius-md);
@@ -903,7 +910,7 @@ p {
 }
 
 .search-results {
-  position: absolute;
+  position: sticky;
   top: 100%;
   left: 0;
   right: 0;
@@ -1063,6 +1070,13 @@ p {
   .nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Navbar buttons - smaller for mobile */
+  .navbar-menu .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    min-height: 36px;
   }
 
   /* Buttons - larger touch targets */

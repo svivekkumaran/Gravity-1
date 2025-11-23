@@ -214,7 +214,7 @@ const PDFGenerator = {
               <p>
                 <strong>Invoice No:</strong> ${bill.invoiceNo}<br>
                 <strong>Date:</strong> ${formatDate(bill.date)}<br>
-                <strong>Billed By:</strong> ${bill.billedBy}
+                <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
               </p>
             </div>
           </div>
