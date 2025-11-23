@@ -264,7 +264,7 @@ const ReportsManager = {
             'CGST': bill.cgst,
             'SGST': bill.sgst,
             'Total': bill.total,
-            'Billed By': bill.billedBy
+            'Billed By': bill.billedBy || 'N/A'
         }));
 
         exportToCSV(csvData, 'sales_report');

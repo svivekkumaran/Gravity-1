@@ -853,7 +853,7 @@ p {
   display: none;
   position: fixed;
   top: 1.5rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 1001;
   background: var(--primary-gradient);
   border: none;
@@ -910,7 +910,7 @@ p {
 }
 
 .search-results {
-  position: absolute;
+  position: sticky;
   top: 100%;
   left: 0;
   right: 0;
@@ -1070,6 +1070,13 @@ p {
   .nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Navbar buttons - smaller for mobile */
+  .navbar-menu .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    min-height: 36px;
   }
 
   /* Buttons - larger touch targets */

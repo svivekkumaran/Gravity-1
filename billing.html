@@ -18,8 +18,8 @@
             <div class="navbar-brand">🛒 Retail Shop Pro</div>
             <div class="navbar-menu">
                 <span id="userDisplay" style="color: var(--text-secondary);"></span>
-                <a href="admin.html" class="btn btn-outline" style="text-decoration: none; margin-right: 0.5rem;"
-                    title="Go to Dashboard">
+                <a href="admin.html" class="btn btn-outline" id="homeButton"
+                    style="text-decoration: none; margin-right: 0.5rem;" title="Go to Dashboard">
                     🏠 Home
                 </a>
                 <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
@@ -118,6 +118,14 @@
         // Display user info
         const user = Auth.getCurrentUser();
         document.getElementById('userDisplay').textContent = `Welcome, ${user.name}`;
+
+        // Hide Home button for billing users (non-admin)
+        if (user.role !== 'admin') {
+            const homeButton = document.getElementById('homeButton');
+            if (homeButton) {
+                homeButton.style.display = 'none';
+            }
+        }
 
         // Initialize billing
         BillingManager.init();
