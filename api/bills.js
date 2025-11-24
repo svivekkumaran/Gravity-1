@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
         // POST /api/bills - Create new bill
         if (req.method === 'POST') {
-            const { customerName, customerPhone, items, subtotal, cgst, sgst, total, billedBy } = req.body;
+            const { customerName, customerPhone, items, subtotal, cgst, sgst, igst, total, billedBy } = req.body;
             const billId = `bill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             // Get next invoice number
@@ -85,8 +85,8 @@ module.exports = async (req, res) => {
 
             // Insert bill
             await db.query(
-                'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, billed_by, items, subtotal, cgst, sgst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10)',
-                [billId, invoiceNo, customerName, customerPhone || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, total]
+                'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+                [billId, invoiceNo, customerName, customerPhone || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
             );
 
             const newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);

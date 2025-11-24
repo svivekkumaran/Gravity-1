@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS bills (
     subtotal DECIMAL(10, 2) NOT NULL,
     cgst DECIMAL(10, 2) NOT NULL,
     sgst DECIMAL(10, 2) NOT NULL,
+    igst DECIMAL(10, 2) DEFAULT 0,
     total DECIMAL(10, 2) NOT NULL
 );
 
