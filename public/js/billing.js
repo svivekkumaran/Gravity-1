@@ -272,6 +272,10 @@ const BillingManager = {
     const customerName = document.getElementById('customerName')?.value || 'Walk-in Customer';
     const customerPhone = document.getElementById('customerPhone')?.value || '';
 
+    // Get current user safely
+    const currentUser = Auth.getCurrentUser();
+    const billedByName = currentUser?.name || 'Unknown User';
+
     const billData = {
       items: this.cart.map(item => ({
         productId: item.productId,
@@ -285,7 +289,7 @@ const BillingManager = {
       sgst: this.currentBill.sgst,
       igst: this.currentBill.igst,
       total: this.currentBill.total,
-      billedBy: Auth.getCurrentUser().name,
+      billedBy: billedByName,
       customerName,
       customerPhone
     };
