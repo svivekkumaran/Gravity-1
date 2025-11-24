@@ -66,13 +66,23 @@ module.exports = async (req, res) => {
             const { customerName, customerPhone, items, subtotal, cgst, sgst, igst, total, billedBy } = req.body;
             const billId = `bill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-            // Get next invoice number
+            // Get next invoice number using MAX to avoid race conditions
             const year = new Date().getFullYear();
-            const existingBills = await db.queryAll(
-                'SELECT invoice_no FROM bills WHERE invoice_no LIKE $1',
+            const result = await db.queryOne(
+                `SELECT invoice_no FROM bills 
+                 WHERE invoice_no LIKE $1 
+                 ORDER BY invoice_no DESC 
+                 LIMIT 1`,
                 [`INV${year}%`]
             );
-            const nextNum = existingBills.length + 1;
+
+            let nextNum = 1;
+            if (result && result.invoice_no) {
+                // Extract the number from the last invoice (e.g., "INV202500014" -> 14)
+                const lastNum = parseInt(result.invoice_no.replace(`INV${year}`, ''));
+                nextNum = lastNum + 1;
+            }
+
             const invoiceNo = `INV${year}${String(nextNum).padStart(5, '0')}`;
 
             // Update stock for each item
@@ -83,13 +93,31 @@ module.exports = async (req, res) => {
                 );
             }
 
-            // Insert bill
-            await db.query(
-                'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-                [billId, invoiceNo, customerName, customerPhone || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
-            );
+            // Insert bill with retry logic for duplicate invoice numbers
+            let retries = 3;
+            let newBill = null;
 
-            const newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);
+            while (retries > 0 && !newBill) {
+                try {
+                    await db.query(
+                        'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+                        [billId, invoiceNo, customerName, customerPhone || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
+                    );
+                    newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);
+                    break;
+                } catch (error) {
+                    if (error.message.includes('duplicate key') && retries > 1) {
+                        // Regenerate invoice number and retry
+                        retries--;
+                        const timestamp = Date.now();
+                        nextNum = parseInt(String(timestamp).slice(-5));
+                        invoiceNo = `INV${year}${String(nextNum).padStart(5, '0')}`;
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+
             return res.json(toCamelCase(newBill));
         }
 
