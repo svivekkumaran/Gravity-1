@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS bills (
     date TIMESTAMP NOT NULL DEFAULT NOW(),
     customer_name TEXT NOT NULL,
     customer_phone TEXT,
+    billed_by TEXT,
     items JSONB NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
     cgst DECIMAL(10, 2) NOT NULL,
