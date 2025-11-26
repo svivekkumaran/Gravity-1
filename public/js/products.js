@@ -141,7 +141,7 @@ const ProductManager = {
       document.getElementById('productPrice').value = product.price;
       document.getElementById('productStock').value = product.stock;
       document.getElementById('productUnit').value = product.unit || 'number';
-      document.getElementById('productGST').value = product.gstRate;
+      document.getElementById('productGST').value = String(product.gstRate);
       document.getElementById('productMinStock').value = product.minStock;
 
       document.querySelector('.modal-title').textContent = 'Edit Product';
