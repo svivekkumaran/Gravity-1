@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS products (
     unit TEXT NOT NULL,
     gst_rate DECIMAL(5, 2) NOT NULL,
     min_stock DECIMAL(10, 2) NOT NULL,
+    hsn_code TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -33,13 +34,17 @@ CREATE TABLE IF NOT EXISTS bills (
     date TIMESTAMP NOT NULL DEFAULT NOW(),
     customer_name TEXT NOT NULL,
     customer_phone TEXT,
+    customer_address TEXT,
+    customer_gstin TEXT,
+    place_of_supply TEXT DEFAULT 'Tamil Nadu (33)',
     billed_by TEXT,
     items JSONB NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
     cgst DECIMAL(10, 2) NOT NULL,
     sgst DECIMAL(10, 2) NOT NULL,
     igst DECIMAL(10, 2) DEFAULT 0,
-    total DECIMAL(10, 2) NOT NULL
+    total DECIMAL(10, 2) NOT NULL,
+    amount_in_words TEXT
 );
 
 -- Settings table

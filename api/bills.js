@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
         // POST /api/bills - Create new bill
         if (req.method === 'POST') {
-            const { customerName, customerPhone, items, subtotal, cgst, sgst, igst, total, billedBy } = req.body;
+            const { customerName, customerPhone, customerAddress, customerGstin, placeOfSupply, amountInWords, items, subtotal, cgst, sgst, igst, total, billedBy } = req.body;
             const billId = `bill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             // Get next invoice number using MAX to avoid race conditions
@@ -100,8 +100,8 @@ module.exports = async (req, res) => {
             while (retries > 0 && !newBill) {
                 try {
                     await db.query(
-                        'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11)',
-                        [billId, invoiceNo, customerName, customerPhone || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
+                        'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, customer_address, customer_gstin, place_of_supply, amount_in_words, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+                        [billId, invoiceNo, customerName, customerPhone || '', customerAddress || '', customerGstin || '', placeOfSupply || 'Tamil Nadu (33)', amountInWords || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
                     );
                     newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);
                     break;

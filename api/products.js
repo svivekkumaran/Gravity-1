@@ -57,12 +57,12 @@ module.exports = async (req, res) => {
 
         // POST /api/products - Create new product
         if (req.method === 'POST') {
-            const { name, category, price, stock, unit, gstRate, minStock } = req.body;
+            const { name, category, price, stock, unit, gstRate, minStock, hsnCode } = req.body;
             const productId = `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             await db.query(
-                'INSERT INTO products (id, name, category, price, stock, unit, gst_rate, min_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())',
-                [productId, name, category, price, stock, unit, gstRate, minStock]
+                'INSERT INTO products (id, name, category, price, stock, unit, gst_rate, min_stock, hsn_code, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())',
+                [productId, name, category, price, stock, unit, gstRate, minStock, hsnCode]
             );
 
             const newProduct = await db.queryOne('SELECT * FROM products WHERE id = $1', [productId]);
@@ -82,6 +82,7 @@ module.exports = async (req, res) => {
             const dbFields = fields.map(f => {
                 if (f === 'gstRate') return 'gst_rate';
                 if (f === 'minStock') return 'min_stock';
+                if (f === 'hsnCode') return 'hsn_code';
                 if (f === 'updatedAt') return 'updated_at';
                 return f;
             });
