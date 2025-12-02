@@ -35,6 +35,11 @@ const ProductManager = {
         render: (product) => `${product.gstRate}%`
       },
       {
+        field: 'hsnCode',
+        label: 'HSN Code',
+        render: (product) => product.hsnCode || 'N/A'
+      },
+      {
         field: 'actions',
         label: 'Actions',
         render: (product) => `
