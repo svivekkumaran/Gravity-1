@@ -228,6 +228,11 @@ const BillingManager = {
 
     const total = subtotal + totalCGST + totalSGST + totalIGST;
 
+    // Get discount (flat amount in Rs)
+    const discountInput = document.getElementById('discountAmount');
+    const discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
+    const finalTotal = Math.max(0, total - discount); // Ensure total doesn't go negative
+
     // Update summary display
     const summaryHTML = `
       <div class="summary-row">
@@ -242,9 +247,15 @@ const BillingManager = {
         <span>SGST:</span>
         <strong>${formatCurrency(totalSGST)}</strong>
       </div>
+      ${discount > 0 ? `
+      <div class="summary-row" style="color: #f59e0b;">
+        <span>Discount:</span>
+        <strong>-${formatCurrency(discount)}</strong>
+      </div>
+      ` : ''}
       <div class="summary-row total">
         <span>Total:</span>
-        <strong>${formatCurrency(total)}</strong>
+        <strong>${formatCurrency(finalTotal)}</strong>
       </div>
     `;
 
@@ -259,7 +270,8 @@ const BillingManager = {
       cgst: totalCGST,
       sgst: totalSGST,
       igst: totalIGST,
-      total
+      discount,
+      total: finalTotal
     };
   },
 
@@ -274,6 +286,9 @@ const BillingManager = {
     const customerPhone = document.getElementById('customerPhone')?.value || '';
     const customerAddress = document.getElementById('customerAddress')?.value || '';
     const customerGstin = document.getElementById('customerGstin')?.value || '';
+    const transportVehicleNumber = document.getElementById('transportVehicle')?.value || '';
+    const transportCharge = parseFloat(document.getElementById('transportCharge')?.value) || 0;
+    const billingNotes = document.getElementById('billingNotes')?.value || '';
 
     // Get current user safely
     const currentUser = Auth.getCurrentUser();
@@ -296,12 +311,16 @@ const BillingManager = {
       cgst: this.currentBill.cgst,
       sgst: this.currentBill.sgst,
       igst: this.currentBill.igst,
+      discount: this.currentBill.discount,
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,
       customerPhone,
       customerAddress,
       customerGstin,
+      transportVehicleNumber,
+      transportCharge,
+      billingNotes,
       placeOfSupply: 'Tamil Nadu (33)',
       amountInWords
     };
@@ -328,6 +347,18 @@ const BillingManager = {
     }
     if (document.getElementById('customerGstin')) {
       document.getElementById('customerGstin').value = '';
+    }
+    if (document.getElementById('transportVehicle')) {
+      document.getElementById('transportVehicle').value = '';
+    }
+    if (document.getElementById('transportCharge')) {
+      document.getElementById('transportCharge').value = '';
+    }
+    if (document.getElementById('billingNotes')) {
+      document.getElementById('billingNotes').value = '';
+    }
+    if (document.getElementById('discountAmount')) {
+      document.getElementById('discountAmount').value = '';
     }
   }
 };

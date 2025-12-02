@@ -220,7 +220,7 @@ const PDFGenerator = {
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
-                <strong>Invoice No:</strong> ${bill.invoiceNo}<br>
+                <strong style="font-size: 16px; color: #667eea;">Invoice No: ${bill.invoiceNo}</strong><br>
                 <strong>Date:</strong> ${formatDate(bill.date)}<br>
                 <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
                 <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
@@ -284,6 +284,18 @@ const PDFGenerator = {
                 <td class="text-right">${formatCurrency(bill.igst)}</td>
               </tr>
             ` : ''}
+            ${bill.discount > 0 ? `
+              <tr style="color: #f59e0b;">
+                <td>Discount:</td>
+                <td class="text-right">-${formatCurrency(bill.discount)}</td>
+              </tr>
+            ` : ''}
+            ${bill.transportCharge > 0 ? `
+              <tr>
+                <td>Transport Charge:</td>
+                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
+              </tr>
+            ` : ''}
             <tr class="total-row">
               <td>Grand Total:</td>
               <td class="text-right">${formatCurrency(bill.total)}</td>
@@ -297,11 +309,13 @@ const PDFGenerator = {
           </div>
           ` : ''}
           
-          <!-- Terms & Conditions -->
-          <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;">
-            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #667eea;">Terms & Conditions:</h4>
-            <p style="margin: 0; font-size: 12px; color: #666;">• Goods once sold cannot be returned</p>
+          <!-- Transport & Billing Notes -->
+          ${bill.transportVehicleNumber || bill.billingNotes ? `
+          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
+            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 5px 0; font-size: 12px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
+            ${bill.billingNotes ? `<p style="margin: 0; font-size: 12px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
           </div>
+          ` : ''}
           
           <!-- Signature Section -->
           <div class="signature-section">
@@ -311,6 +325,11 @@ const PDFGenerator = {
             <div class="signature-block">
               <div class="signature-line">Authorized Signatory</div>
             </div>
+          </div>
+          
+          <!-- Terms & Conditions (Bottom) -->
+          <div style="margin-top: 30px; padding: 10px; background: #f9f9f9; border-top: 1px solid #ddd;">
+            <p style="margin: 0; font-size: 10px; color: #666; text-align: center;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
           </div>
           
           <!-- Footer -->

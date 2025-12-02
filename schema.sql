@@ -44,7 +44,11 @@ CREATE TABLE IF NOT EXISTS bills (
     sgst DECIMAL(10, 2) NOT NULL,
     igst DECIMAL(10, 2) DEFAULT 0,
     total DECIMAL(10, 2) NOT NULL,
-    amount_in_words TEXT
+    amount_in_words TEXT,
+    discount DECIMAL(10, 2) DEFAULT 0,
+    transport_vehicle_number TEXT,
+    transport_charge DECIMAL(10, 2) DEFAULT 0,
+    billing_notes TEXT
 );
 
 -- Settings table
