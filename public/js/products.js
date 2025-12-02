@@ -108,6 +108,8 @@ const ProductManager = {
           </div>
 
           <div class="form-group">
+            <label class="form-label">HSN Code *</label>
+            <input type="text" class="form-input" id="productHSN" required>
           </div>
         </div>
 
@@ -141,7 +143,8 @@ const ProductManager = {
       document.getElementById('productPrice').value = product.price;
       document.getElementById('productStock').value = product.stock;
       document.getElementById('productUnit').value = product.unit || 'number';
-      document.getElementById('productGST').value = String(product.gstRate);
+      document.getElementById('productGST').value = product.gstRate;
+      document.getElementById('productHSN').value = product.hsnCode || '';
       document.getElementById('productMinStock').value = product.minStock;
 
       document.querySelector('.modal-title').textContent = 'Edit Product';
@@ -159,6 +162,7 @@ const ProductManager = {
       stock: parseInt(document.getElementById('productStock').value),
       unit: document.getElementById('productUnit').value,
       gstRate: parseFloat(document.getElementById('productGST').value),
+      hsnCode: document.getElementById('productHSN').value,
       minStock: parseInt(document.getElementById('productMinStock').value)
     };
 

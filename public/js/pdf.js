@@ -183,6 +183,12 @@ const PDFGenerator = {
             .no-print {
               display: none;
             }
+            /* Fix Chrome color printing */
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
           }
         </style>
       </head>
@@ -207,13 +213,16 @@ const PDFGenerator = {
               <h3>Bill To:</h3>
               <p>
                 <strong>${bill.customerName}</strong><br>
-                ${bill.customerPhone ? 'Phone: ' + bill.customerPhone : ''}
+                ${bill.customerAddress ? bill.customerAddress + '<br>' : ''}
+                ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
+                ${bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
               </p>
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
                 <strong>Invoice No:</strong> ${bill.invoiceNo}<br>
                 <strong>Date:</strong> ${formatDate(bill.date)}<br>
+                <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
                 <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
               </p>
             </div>
@@ -225,6 +234,7 @@ const PDFGenerator = {
               <tr>
                 <th>S.No</th>
                 <th>Product Name</th>
+                <th>HSN</th>
                 <th class="text-center">Qty</th>
                 <th class="text-right">Price</th>
                 <th class="text-center">GST%</th>
@@ -242,6 +252,7 @@ const PDFGenerator = {
                   <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
+                    <td>${item.hsnCode || 'N/A'}</td>
                     <td class="text-center">${item.qty}</td>
                     <td class="text-right">${formatCurrency(item.price)}</td>
                     <td class="text-center">${item.gstRate}%</td>
@@ -279,6 +290,19 @@ const PDFGenerator = {
             </tr>
           </table>
           
+          <!-- Amount in Words -->
+          ${bill.amountInWords ? `
+          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-left: 3px solid #667eea;">
+            <strong>Amount in Words:</strong> ${bill.amountInWords}
+          </div>
+          ` : ''}
+          
+          <!-- Terms & Conditions -->
+          <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #667eea;">Terms & Conditions:</h4>
+            <p style="margin: 0; font-size: 12px; color: #666;">• Goods once sold cannot be returned</p>
+          </div>
+          
           <!-- Signature Section -->
           <div class="signature-section">
             <div class="signature-block">
@@ -311,5 +335,13 @@ const PDFGenerator = {
 
     printWindow.document.write(invoiceHTML);
     printWindow.document.close();
+
+    // Fix Safari empty page issue - wait for content to load before showing
+    printWindow.onload = function () {
+      // Small delay to ensure rendering is complete
+      setTimeout(function () {
+        printWindow.focus();
+      }, 100);
+    };
   }
 };

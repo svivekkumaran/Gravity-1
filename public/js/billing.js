@@ -100,6 +100,7 @@ const BillingManager = {
         name: product.name,
         price: product.price,
         gstRate: product.gstRate,
+        hsnCode: product.hsnCode,
         unit: product.unit || 'units',
         qty: 1,
         maxStock: product.stock
@@ -271,10 +272,16 @@ const BillingManager = {
 
     const customerName = document.getElementById('customerName')?.value || 'Walk-in Customer';
     const customerPhone = document.getElementById('customerPhone')?.value || '';
+    const customerAddress = document.getElementById('customerAddress')?.value || '';
+    const customerGstin = document.getElementById('customerGstin')?.value || '';
 
     // Get current user safely
     const currentUser = Auth.getCurrentUser();
     const billedByName = currentUser?.name || 'Unknown User';
+
+    // Calculate amount in words
+    const totalRounded = Math.round(this.currentBill.total);
+    const amountInWords = numberToWords(totalRounded) + ' Rupees Only';
 
     const billData = {
       items: this.cart.map(item => ({
@@ -282,7 +289,8 @@ const BillingManager = {
         name: item.name,
         qty: item.qty,
         price: item.price,
-        gstRate: item.gstRate
+        gstRate: item.gstRate,
+        hsnCode: item.hsnCode
       })),
       subtotal: this.currentBill.subtotal,
       cgst: this.currentBill.cgst,
@@ -291,7 +299,11 @@ const BillingManager = {
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,
-      customerPhone
+      customerPhone,
+      customerAddress,
+      customerGstin,
+      placeOfSupply: 'Tamil Nadu (33)',
+      amountInWords
     };
 
     const bill = await DB.addBill(billData);
@@ -310,6 +322,12 @@ const BillingManager = {
     }
     if (document.getElementById('customerPhone')) {
       document.getElementById('customerPhone').value = '';
+    }
+    if (document.getElementById('customerAddress')) {
+      document.getElementById('customerAddress').value = '';
+    }
+    if (document.getElementById('customerGstin')) {
+      document.getElementById('customerGstin').value = '';
     }
   }
 };
