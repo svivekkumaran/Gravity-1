@@ -393,13 +393,10 @@ const PDFGenerator = {
           </div>
           ` : ''}
           
-          <!-- Additional Notes Section (with billing notes if any) -->
-          <div style="margin-top: 8px; padding: 8px; border: 1px solid #ddd; min-height: 55px; page-break-inside: avoid;">
-            <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #333;">Additional Notes:</p>
-            ${bill.billingNotes ? `<p style="margin: 0 0 5px 0; font-size: 10px;">${bill.billingNotes}</p>` : ''}
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
-            <div style="border-bottom: 1px solid #ccc; height: 14px;"></div>
+          <!-- Additional Notes Section (simple text box) -->
+          <div style="margin-top: 8px; padding: 8px; border: 1px solid #ddd; min-height: 30px; page-break-inside: avoid;">
+            <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
+            <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
           </div>
           
           <!-- Signature Section -->
