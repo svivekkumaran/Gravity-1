@@ -263,7 +263,7 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            <div class="tamil-blessing">உ<br>ஸ்ரீ ராம ஜெயம்</div>
+            <div class="tamil-blessing"><u>உ</u><br>ஸ்ரீ ராம ஜெயம்</div>
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
@@ -394,7 +394,7 @@ const PDFGenerator = {
           ` : ''}
           
           <!-- Additional Notes Section (simple text box) -->
-          <div style="margin-top: 8px; padding: 8px; border: 1px solid #ddd; min-height: 30px; page-break-inside: avoid;">
+          <div style="margin-top: 8px; padding: 8px; min-height: 30px; page-break-inside: avoid;">
             <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
             <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
           </div>
