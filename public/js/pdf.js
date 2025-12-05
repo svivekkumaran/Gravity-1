@@ -54,10 +54,11 @@ const PDFGenerator = {
           
           .tamil-blessing {
             text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
+            font-size: 10px;
+            font-weight: normal;
+            color: #000;
+            margin-bottom: 8px;
+            line-height: 1.4;
           }
           
           .company-name {
@@ -180,8 +181,8 @@ const PDFGenerator = {
           }
           
           .footer {
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 2px solid #ddd;
             text-align: center;
             font-size: 11px;
@@ -190,7 +191,7 @@ const PDFGenerator = {
           }
           
           .signature-section {
-            margin-top: 40px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             page-break-inside: avoid;
@@ -262,7 +263,7 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            <div class="tamil-blessing">ஸ்ரீ ராம ஜெயம்</div>
+            <div class="tamil-blessing">உ<br>ஸ்ரீ ராம ஜெயம்</div>
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
@@ -380,25 +381,25 @@ const PDFGenerator = {
           
           <!-- Amount in Words -->
           ${bill.amountInWords ? `
-          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-left: 3px solid #667eea;">
+          <div style="margin-top: 15px; padding: 8px; background: #f9f9f9; border-left: 3px solid #667eea;">
             <strong>Amount in Words:</strong> ${bill.amountInWords}
           </div>
           ` : ''}
           
           <!-- Transport & Billing Notes -->
           ${bill.transportVehicleNumber || bill.billingNotes ? `
-          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
-            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 5px 0; font-size: 12px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
-            ${bill.billingNotes ? `<p style="margin: 0; font-size: 12px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
+          <div style="margin-top: 12px; padding: 8px; background: #f9f9f9; border: 1px solid #ddd;">
+            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 5px 0; font-size: 11px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
+            ${bill.billingNotes ? `<p style="margin: 0; font-size: 11px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
           </div>
           ` : ''}
           
           <!-- Blank Notes Section for Manual Writing -->
-          <div style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; min-height: 80px; page-break-inside: avoid;">
-            <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #333;">Additional Notes:</p>
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 8px; height: 20px;"></div>
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 8px; height: 20px;"></div>
-            <div style="border-bottom: 1px solid #ccc; height: 20px;"></div>
+          <div style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 70px; page-break-inside: avoid;">
+            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; color: #333;">Additional Notes:</p>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 6px; height: 18px;"></div>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 6px; height: 18px;"></div>
+            <div style="border-bottom: 1px solid #ccc; height: 18px;"></div>
           </div>
           
           <!-- Signature Section -->
@@ -411,15 +412,11 @@ const PDFGenerator = {
             </div>
           </div>
           
-          <!-- Terms & Conditions (Bottom) -->
-          <div style="margin-top: 30px; padding: 10px; background: #f9f9f9; border-top: 1px solid #ddd;">
-            <p style="margin: 0; font-size: 10px; color: #666; text-align: center;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
-          </div>
-          
-          <!-- Footer -->
+          <!-- Footer with Terms & Conditions -->
           <div class="footer">
-            <p><strong>Thank you for your business!</strong></p>
-            <p>This is a computer-generated invoice and does not require a physical signature.</p>
+            <p style="margin: 0 0 5px 0;"><strong>Thank you for your business!</strong></p>
+            <p style="margin: 0 0 5px 0;">This is a computer-generated invoice and does not require a physical signature.</p>
+            <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
           </div>
           
           <!-- Print Button -->
