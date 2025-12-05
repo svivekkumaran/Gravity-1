@@ -42,7 +42,7 @@ const PDFGenerator = {
             max-width: 800px;
             margin: 0 auto;
             border: 2px solid #333;
-            padding: 30px;
+            padding: 20px;
           }
           
           .invoice-header {
