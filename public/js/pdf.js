@@ -47,8 +47,8 @@ const PDFGenerator = {
           
           .invoice-header {
             border-bottom: 3px solid #333;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
             position: relative;
           }
           
@@ -77,9 +77,9 @@ const PDFGenerator = {
           }
           
           .invoice-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 12px 0;
             color: #333;
             display: flex;
             justify-content: space-between;
@@ -95,7 +95,7 @@ const PDFGenerator = {
           .invoice-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
           }
           
           .info-block {
@@ -117,7 +117,7 @@ const PDFGenerator = {
           table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 12px 0;
             page-break-inside: auto;
           }
           
@@ -137,16 +137,16 @@ const PDFGenerator = {
           th {
             background: #667eea;
             color: white;
-            padding: 12px;
+            padding: 8px;
             text-align: left;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
           }
           
           td {
-            padding: 10px 12px;
+            padding: 6px 8px;
             border-bottom: 1px solid #ddd;
-            font-size: 12px;
+            font-size: 11px;
           }
           
           tr:nth-child(even) {
@@ -164,34 +164,34 @@ const PDFGenerator = {
           .summary-table {
             margin-left: auto;
             width: 300px;
-            margin-top: 20px;
+            margin-top: 10px;
             page-break-inside: avoid;
           }
           
           .summary-table td {
             border: none;
-            padding: 8px 12px;
+            padding: 5px 8px;
           }
           
           .summary-table .total-row {
             background: #667eea;
             color: white;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
           }
           
           .footer {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 2px solid #ddd;
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
             page-break-inside: avoid;
           }
           
           .signature-section {
-            margin-top: 25px;
+            margin-top: 15px;
             display: flex;
             justify-content: space-between;
             page-break-inside: avoid;
@@ -205,9 +205,9 @@ const PDFGenerator = {
           .signature-line {
             width: 200px;
             border-top: 1px solid #333;
-            margin-top: 50px;
+            margin-top: 35px;
             padding-top: 5px;
-            font-size: 12px;
+            font-size: 11px;
           }
           
           @page {
@@ -381,25 +381,25 @@ const PDFGenerator = {
           
           <!-- Amount in Words -->
           ${bill.amountInWords ? `
-          <div style="margin-top: 15px; padding: 8px; background: #f9f9f9; border-left: 3px solid #667eea;">
+          <div style="margin-top: 10px; padding: 6px; background: #f9f9f9; border-left: 3px solid #667eea; font-size: 11px;">
             <strong>Amount in Words:</strong> ${bill.amountInWords}
           </div>
           ` : ''}
           
           <!-- Transport & Billing Notes -->
           ${bill.transportVehicleNumber || bill.billingNotes ? `
-          <div style="margin-top: 12px; padding: 8px; background: #f9f9f9; border: 1px solid #ddd;">
-            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 5px 0; font-size: 11px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
-            ${bill.billingNotes ? `<p style="margin: 0; font-size: 11px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
+          <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
+            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 3px 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
+            ${bill.billingNotes ? `<p style="margin: 0; font-size: 10px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
           </div>
           ` : ''}
           
           <!-- Blank Notes Section for Manual Writing -->
-          <div style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 70px; page-break-inside: avoid;">
-            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; color: #333;">Additional Notes:</p>
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 6px; height: 18px;"></div>
-            <div style="border-bottom: 1px solid #ccc; margin-bottom: 6px; height: 18px;"></div>
-            <div style="border-bottom: 1px solid #ccc; height: 18px;"></div>
+          <div style="margin-top: 8px; padding: 8px; border: 1px solid #ddd; min-height: 55px; page-break-inside: avoid;">
+            <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #333;">Additional Notes:</p>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
+            <div style="border-bottom: 1px solid #ccc; height: 14px;"></div>
           </div>
           
           <!-- Signature Section -->
