@@ -386,17 +386,17 @@ const PDFGenerator = {
           </div>
           ` : ''}
           
-          <!-- Transport & Billing Notes -->
-          ${bill.transportVehicleNumber || bill.billingNotes ? `
+          <!-- Transport Vehicle (if exists) -->
+          ${bill.transportVehicleNumber ? `
           <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
-            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 3px 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
-            ${bill.billingNotes ? `<p style="margin: 0; font-size: 10px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
+            <p style="margin: 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>
           </div>
           ` : ''}
           
-          <!-- Blank Notes Section for Manual Writing -->
+          <!-- Additional Notes Section (with billing notes if any) -->
           <div style="margin-top: 8px; padding: 8px; border: 1px solid #ddd; min-height: 55px; page-break-inside: avoid;">
             <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #333;">Additional Notes:</p>
+            ${bill.billingNotes ? `<p style="margin: 0 0 5px 0; font-size: 10px;">${bill.billingNotes}</p>` : ''}
             <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
             <div style="border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 14px;"></div>
             <div style="border-bottom: 1px solid #ccc; height: 14px;"></div>
