@@ -231,7 +231,12 @@ const BillingManager = {
     // Get discount (flat amount in Rs)
     const discountInput = document.getElementById('discountAmount');
     const discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
-    const finalTotal = Math.max(0, total - discount); // Ensure total doesn't go negative
+
+    // Get delivery charge (transport charge)
+    const deliveryChargeInput = document.getElementById('transportCharge');
+    const deliveryCharge = deliveryChargeInput ? parseFloat(deliveryChargeInput.value) || 0 : 0;
+
+    const finalTotal = Math.max(0, total - discount + deliveryCharge); // Add delivery charge to total
 
     // Update summary display
     const summaryHTML = `
@@ -253,8 +258,14 @@ const BillingManager = {
         <strong>-${formatCurrency(discount)}</strong>
       </div>
       ` : ''}
+      ${deliveryCharge > 0 ? `
+      <div class="summary-row">
+        <span>Delivery Charge (incl. GST):</span>
+        <strong>${formatCurrency(deliveryCharge)}</strong>
+      </div>
+      ` : ''}
       <div class="summary-row total">
-        <span>Total:</span>
+        <span>Grand Total:</span>
         <strong>${formatCurrency(finalTotal)}</strong>
       </div>
     `;
@@ -271,6 +282,7 @@ const BillingManager = {
       sgst: totalSGST,
       igst: totalIGST,
       discount,
+      deliveryCharge,
       total: finalTotal
     };
   },
@@ -303,6 +315,7 @@ const BillingManager = {
         productId: item.productId,
         name: item.name,
         qty: item.qty,
+        unit: item.unit || 'units',
         price: item.price,
         gstRate: item.gstRate,
         hsnCode: item.hsnCode
@@ -312,6 +325,7 @@ const BillingManager = {
       sgst: this.currentBill.sgst,
       igst: this.currentBill.igst,
       discount: this.currentBill.discount,
+      transportCharge: this.currentBill.deliveryCharge,
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,

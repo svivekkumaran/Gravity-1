@@ -46,13 +46,22 @@ const PDFGenerator = {
           }
           
           .invoice-header {
-            text-align: center;
             border-bottom: 3px solid #333;
             padding-bottom: 20px;
             margin-bottom: 20px;
+            position: relative;
+          }
+          
+          .tamil-blessing {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
           }
           
           .company-name {
+            text-align: center;
             font-size: 28px;
             font-weight: bold;
             color: #667eea;
@@ -60,17 +69,26 @@ const PDFGenerator = {
           }
           
           .company-details {
+            text-align: center;
             font-size: 12px;
             line-height: 1.6;
             color: #666;
           }
           
           .invoice-title {
-            text-align: center;
             font-size: 24px;
             font-weight: bold;
             margin: 20px 0;
             color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          
+          .invoice-number {
+            font-size: 16px;
+            color: #667eea;
+            font-weight: bold;
           }
           
           .invoice-info {
@@ -99,6 +117,20 @@ const PDFGenerator = {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            page-break-inside: auto;
+          }
+          
+          thead {
+            display: table-header-group;
+          }
+          
+          tbody {
+            display: table-row-group;
+          }
+          
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
           }
           
           th {
@@ -132,6 +164,7 @@ const PDFGenerator = {
             margin-left: auto;
             width: 300px;
             margin-top: 20px;
+            page-break-inside: avoid;
           }
           
           .summary-table td {
@@ -153,12 +186,15 @@ const PDFGenerator = {
             text-align: center;
             font-size: 11px;
             color: #666;
+            page-break-inside: avoid;
           }
           
           .signature-section {
-            margin-top: 60px;
+            margin-top: 40px;
             display: flex;
             justify-content: space-between;
+            page-break-inside: avoid;
+            page-break-before: avoid;
           }
           
           .signature-block {
@@ -173,6 +209,11 @@ const PDFGenerator = {
             font-size: 12px;
           }
           
+          @page {
+            margin: 0.5cm;
+            size: A4;
+          }
+          
           @media print {
             body {
               padding: 0;
@@ -183,6 +224,31 @@ const PDFGenerator = {
             .no-print {
               display: none;
             }
+            /* Prevent page breaks */
+            .summary-table,
+            .signature-section,
+            .footer {
+              page-break-inside: avoid;
+            }
+            
+            /* Keep Terms & Conditions with signature */
+            .signature-section {
+              page-break-before: avoid;
+            }
+            
+            /* Allow table to break naturally but keep rows together */
+            table {
+              page-break-inside: auto;
+            }
+            
+            thead {
+              display: table-header-group;
+            }
+            
+            tr {
+              page-break-inside: avoid;
+            }
+            
             /* Fix Chrome color printing */
             * {
               -webkit-print-color-adjust: exact !important;
@@ -196,6 +262,7 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
+            <div class="tamil-blessing">ஸ்ரீ ராம ஜெயம்</div>
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
@@ -205,7 +272,10 @@ const PDFGenerator = {
           </div>
           
           <!-- Invoice Title -->
-          <div class="invoice-title">TAX INVOICE</div>
+          <div class="invoice-title">
+            <span>TAX INVOICE</span>
+            <span class="invoice-number">Invoice No: ${bill.invoiceNo}</span>
+          </div>
           
           <!-- Invoice Info -->
           <div class="invoice-info">
@@ -220,7 +290,6 @@ const PDFGenerator = {
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
-                <strong style="font-size: 16px; color: #667eea;">Invoice No: ${bill.invoiceNo}</strong><br>
                 <strong>Date:</strong> ${formatDate(bill.date)}<br>
                 <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
                 <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
@@ -248,12 +317,19 @@ const PDFGenerator = {
       const gst = calculateGST(itemSubtotal, item.gstRate);
       const itemTotal = itemSubtotal + gst.total;
 
+      // Format unit for display - capitalize first letter and handle singular/plural
+      let unitDisplay = item.unit || 'units';
+      if (unitDisplay === 'num') unitDisplay = 'Num';
+      else if (unitDisplay === 'bags') unitDisplay = item.qty === 1 ? 'Bag' : 'Bags';
+      else if (unitDisplay === 'units') unitDisplay = item.qty === 1 ? 'Unit' : 'Units';
+      else unitDisplay = unitDisplay.charAt(0).toUpperCase() + unitDisplay.slice(1);
+
       return `
                   <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
                     <td>${item.hsnCode || 'N/A'}</td>
-                    <td class="text-center">${item.qty}</td>
+                    <td class="text-center">${item.qty} ${unitDisplay}</td>
                     <td class="text-right">${formatCurrency(item.price)}</td>
                     <td class="text-center">${item.gstRate}%</td>
                     <td class="text-right">${formatCurrency(gst.total)}</td>
@@ -292,7 +368,7 @@ const PDFGenerator = {
             ` : ''}
             ${bill.transportCharge > 0 ? `
               <tr>
-                <td>Transport Charge:</td>
+                <td>Delivery Charge (incl. GST):</td>
                 <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
               </tr>
             ` : ''}
@@ -316,6 +392,14 @@ const PDFGenerator = {
             ${bill.billingNotes ? `<p style="margin: 0; font-size: 12px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
           </div>
           ` : ''}
+          
+          <!-- Blank Notes Section for Manual Writing -->
+          <div style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; min-height: 80px; page-break-inside: avoid;">
+            <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #333;">Additional Notes:</p>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 8px; height: 20px;"></div>
+            <div style="border-bottom: 1px solid #ccc; margin-bottom: 8px; height: 20px;"></div>
+            <div style="border-bottom: 1px solid #ccc; height: 20px;"></div>
+          </div>
           
           <!-- Signature Section -->
           <div class="signature-section">
