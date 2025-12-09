@@ -303,11 +303,11 @@ const PDFGenerator = {
                 ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
                 ${bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
               </p>
+            </div>
+            <div class="info-block">
               ${bill.deliveryAddress ? `
-              <p style="margin-top: 10px;">
-                <strong>Deliver To:</strong><br>
-                ${bill.deliveryAddress}
-              </p>
+              <h3>Delivery To:</h3>
+              <p>${bill.deliveryAddress}</p>
               ` : ''}
             </div>
             <div class="info-block" style="text-align: right;">
