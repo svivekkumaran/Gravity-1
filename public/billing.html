@@ -123,13 +123,6 @@
                         </div>
                     </div>
 
-                    <!-- Discount Field -->
-                    <div class="form-group mt-3">
-                        <label class="form-label">Discount (₹)</label>
-                        <input type="number" class="form-input" id="discountAmount" placeholder="0.00" step="0.01"
-                            min="0" oninput="BillingManager.updateSummary()">
-                    </div>
-
                     <button class="btn btn-success mt-3" style="width: 100%;" onclick="BillingManager.generateBill()">
                         Generate Bill & Print
                     </button>
