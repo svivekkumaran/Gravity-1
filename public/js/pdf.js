@@ -4,6 +4,19 @@
 // ============================================
 
 const PDFGenerator = {
+  // Helper function to format tamil blessing (underline first line)
+  formatTamilBlessing(blessing) {
+    if (!blessing) return '';
+    const lines = blessing.split('\n');
+    if (lines.length === 0) return '';
+
+    // Underline the first line, keep rest as-is
+    const firstLine = `<u>${lines[0]}</u>`;
+    const remainingLines = lines.slice(1).join('<br>');
+
+    return remainingLines ? `${firstLine}<br>${remainingLines}` : firstLine;
+  },
+
   // Generate invoice PDF
   async generateInvoice(bill) {
     // Create a new window for printing
@@ -265,7 +278,7 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            ${tamilBlessing ? `<div class="tamil-blessing">${tamilBlessing}</div>` : ''}
+            ${tamilBlessing ? `<div class="tamil-blessing">${this.formatTamilBlessing(tamilBlessing)}</div>` : ''}
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
