@@ -326,6 +326,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label class="form-label">Tamil Blessing (shown on invoices)</label>
+                            <textarea class="form-textarea" id="tamilBlessing" rows="2"
+                                placeholder="உ&#10;ஸ்ரீ ராம ஜெயம்"></textarea>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.25rem;">Leave empty to hide
+                                the blessing on invoices</p>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Save Settings</button>
                     </form>
                 </div>
@@ -509,6 +517,7 @@
             document.getElementById('companyStateCode').value = settings.stateCode;
             document.getElementById('companyPhone').value = settings.phone;
             document.getElementById('companyEmail').value = settings.email;
+            document.getElementById('tamilBlessing').value = settings.tamilBlessing || '';
         }
 
         // Save settings
@@ -521,7 +530,8 @@
                 gstin: document.getElementById('companyGSTIN').value,
                 stateCode: document.getElementById('companyStateCode').value,
                 phone: document.getElementById('companyPhone').value,
-                email: document.getElementById('companyEmail').value
+                email: document.getElementById('companyEmail').value,
+                tamilBlessing: document.getElementById('tamilBlessing').value
             };
 
             await DB.updateSettings(settings);
