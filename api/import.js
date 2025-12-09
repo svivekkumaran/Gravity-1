@@ -58,14 +58,15 @@ module.exports = async (req, res) => {
             // Import settings
             if (settings) {
                 await db.query(
-                    'UPDATE settings SET company_name = $1, address = $2, gstin = $3, phone = $4, email = $5, state_code = $6 WHERE id = 1',
+                    'UPDATE settings SET company_name = $1, address = $2, gstin = $3, phone = $4, email = $5, state_code = $6, tamil_blessing = $7 WHERE id = 1',
                     [
                         settings.companyName || settings.company_name,
                         settings.address,
                         settings.gstin,
                         settings.phone,
                         settings.email,
-                        settings.stateCode || settings.state_code
+                        settings.stateCode || settings.state_code,
+                        settings.tamilBlessing || settings.tamil_blessing || ''
                     ]
                 );
             }

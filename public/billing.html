@@ -63,13 +63,13 @@
                     </div>
                     <div class="grid grid-2 mt-2">
                         <div class="form-group">
-                            <label class="form-label">Transport Vehicle No. (Optional)</label>
-                            <input type="text" class="form-input" id="transportVehicle" placeholder="Vehicle Number">
+                            <label class="form-label">Delivery to Address (Optional)</label>
+                            <input type="text" class="form-input" id="deliveryAddress"
+                                placeholder="If different from customer address">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Delivery Charge (Optional)</label>
-                            <input type="number" class="form-input" id="transportCharge" placeholder="₹0.00" step="0.01"
-                                min="0" oninput="BillingManager.updateSummary()">
+                            <label class="form-label">Transport Vehicle No. (Optional)</label>
+                            <input type="text" class="form-input" id="transportVehicle" placeholder="Vehicle Number">
                         </div>
                     </div>
                     <div class="form-group mt-2">
@@ -121,13 +121,6 @@
                             <span>Total:</span>
                             <strong>₹0.00</strong>
                         </div>
-                    </div>
-
-                    <!-- Discount Field -->
-                    <div class="form-group mt-3">
-                        <label class="form-label">Discount (₹)</label>
-                        <input type="number" class="form-input" id="discountAmount" placeholder="0.00" step="0.01"
-                            min="0" oninput="BillingManager.updateSummary()">
                     </div>
 
                     <button class="btn btn-success mt-3" style="width: 100%;" onclick="BillingManager.generateBill()">

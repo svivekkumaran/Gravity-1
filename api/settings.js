@@ -31,11 +31,11 @@ module.exports = async (req, res) => {
 
         if (req.method === 'PUT') {
             // Update settings
-            const { companyName, address, gstin, phone, email, stateCode } = req.body;
+            const { companyName, address, gstin, phone, email, stateCode, tamilBlessing } = req.body;
 
             await db.query(
-                'UPDATE settings SET company_name = $1, address = $2, gstin = $3, phone = $4, email = $5, state_code = $6 WHERE id = 1',
-                [companyName, address, gstin, phone, email, stateCode]
+                'UPDATE settings SET company_name = $1, address = $2, gstin = $3, phone = $4, email = $5, state_code = $6, tamil_blessing = $7 WHERE id = 1',
+                [companyName, address, gstin, phone, email, stateCode, tamilBlessing]
             );
 
             const settings = await db.queryOne('SELECT * FROM settings WHERE id = 1');

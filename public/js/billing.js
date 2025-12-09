@@ -228,16 +228,6 @@ const BillingManager = {
 
     const total = subtotal + totalCGST + totalSGST + totalIGST;
 
-    // Get discount (flat amount in Rs)
-    const discountInput = document.getElementById('discountAmount');
-    const discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
-
-    // Get delivery charge (transport charge)
-    const deliveryChargeInput = document.getElementById('transportCharge');
-    const deliveryCharge = deliveryChargeInput ? parseFloat(deliveryChargeInput.value) || 0 : 0;
-
-    const finalTotal = Math.max(0, total - discount + deliveryCharge); // Add delivery charge to total
-
     // Update summary display
     const summaryHTML = `
       <div class="summary-row">
@@ -252,21 +242,9 @@ const BillingManager = {
         <span>SGST:</span>
         <strong>${formatCurrency(totalSGST)}</strong>
       </div>
-      ${discount > 0 ? `
-      <div class="summary-row" style="color: #f59e0b;">
-        <span>Discount:</span>
-        <strong>-${formatCurrency(discount)}</strong>
-      </div>
-      ` : ''}
-      ${deliveryCharge > 0 ? `
-      <div class="summary-row">
-        <span>Delivery Charge (incl. GST):</span>
-        <strong>${formatCurrency(deliveryCharge)}</strong>
-      </div>
-      ` : ''}
       <div class="summary-row total">
         <span>Grand Total:</span>
-        <strong>${formatCurrency(finalTotal)}</strong>
+        <strong>${formatCurrency(total)}</strong>
       </div>
     `;
 
@@ -281,9 +259,7 @@ const BillingManager = {
       cgst: totalCGST,
       sgst: totalSGST,
       igst: totalIGST,
-      discount,
-      deliveryCharge,
-      total: finalTotal
+      total
     };
   },
 
@@ -298,8 +274,8 @@ const BillingManager = {
     const customerPhone = document.getElementById('customerPhone')?.value || '';
     const customerAddress = document.getElementById('customerAddress')?.value || '';
     const customerGstin = document.getElementById('customerGstin')?.value || '';
+    const deliveryAddress = document.getElementById('deliveryAddress')?.value || '';
     const transportVehicleNumber = document.getElementById('transportVehicle')?.value || '';
-    const transportCharge = parseFloat(document.getElementById('transportCharge')?.value) || 0;
     const billingNotes = document.getElementById('billingNotes')?.value || '';
 
     // Get current user safely
@@ -324,16 +300,16 @@ const BillingManager = {
       cgst: this.currentBill.cgst,
       sgst: this.currentBill.sgst,
       igst: this.currentBill.igst,
-      discount: this.currentBill.discount,
-      transportCharge: this.currentBill.deliveryCharge,
+      discount: 0,
+      transportCharge: 0,
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,
       customerPhone,
       customerAddress,
       customerGstin,
+      deliveryAddress,
       transportVehicleNumber,
-      transportCharge,
       billingNotes,
       placeOfSupply: 'Tamil Nadu (33)',
       amountInWords
@@ -362,17 +338,14 @@ const BillingManager = {
     if (document.getElementById('customerGstin')) {
       document.getElementById('customerGstin').value = '';
     }
+    if (document.getElementById('deliveryAddress')) {
+      document.getElementById('deliveryAddress').value = '';
+    }
     if (document.getElementById('transportVehicle')) {
       document.getElementById('transportVehicle').value = '';
     }
-    if (document.getElementById('transportCharge')) {
-      document.getElementById('transportCharge').value = '';
-    }
     if (document.getElementById('billingNotes')) {
       document.getElementById('billingNotes').value = '';
-    }
-    if (document.getElementById('discountAmount')) {
-      document.getElementById('discountAmount').value = '';
     }
   }
 };

@@ -17,6 +17,7 @@ const PDFGenerator = {
     const gstin = settings.gstin || 'GSTIN Number';
     const phone = settings.phone || 'Phone Number';
     const email = settings.email || 'Email Address';
+    const tamilBlessing = settings.tamilBlessing || '';
 
     const invoiceHTML = `
       <!DOCTYPE html>
@@ -59,6 +60,7 @@ const PDFGenerator = {
             color: #000;
             margin-bottom: 8px;
             line-height: 1.4;
+            white-space: pre-line;
           }
           
           .company-name {
@@ -263,7 +265,7 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            <div class="tamil-blessing"><u>உ</u><br>ஸ்ரீ ராம ஜெயம்</div>
+            ${tamilBlessing ? `<div class="tamil-blessing">${tamilBlessing}</div>` : ''}
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
@@ -288,6 +290,12 @@ const PDFGenerator = {
                 ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
                 ${bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
               </p>
+              ${bill.deliveryAddress ? `
+              <p style="margin-top: 10px;">
+                <strong>Deliver To:</strong><br>
+                ${bill.deliveryAddress}
+              </p>
+              ` : ''}
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
@@ -359,18 +367,6 @@ const PDFGenerator = {
               <tr>
                 <td>IGST:</td>
                 <td class="text-right">${formatCurrency(bill.igst)}</td>
-              </tr>
-            ` : ''}
-            ${bill.discount > 0 ? `
-              <tr style="color: #f59e0b;">
-                <td>Discount:</td>
-                <td class="text-right">-${formatCurrency(bill.discount)}</td>
-              </tr>
-            ` : ''}
-            ${bill.transportCharge > 0 ? `
-              <tr>
-                <td>Delivery Charge (incl. GST):</td>
-                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
               </tr>
             ` : ''}
             <tr class="total-row">

@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS bills (
     customer_phone TEXT,
     customer_address TEXT,
     customer_gstin TEXT,
+    delivery_address TEXT,
     place_of_supply TEXT DEFAULT 'Tamil Nadu (33)',
     billed_by TEXT,
     items JSONB NOT NULL,
@@ -59,7 +60,8 @@ CREATE TABLE IF NOT EXISTS settings (
     gstin TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT NOT NULL,
-    state_code TEXT NOT NULL
+    state_code TEXT NOT NULL,
+    tamil_blessing TEXT DEFAULT 'உ\nஸ்ரீ ராம ஜெயம்'
 );
 
 -- Create indexes for better performance
@@ -82,6 +84,7 @@ VALUES
     ('prod_2', 'Sample Product 2', 'Groceries', 500.00, 100, 'liters', 5.00, 20, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO settings (id, company_name, address, gstin, phone, email, state_code)
-VALUES (1, 'Retail Shop Pro', '123 Business Street, City, State - 123456', '22AAAAA0000A1Z5', '+91 9876543210', 'info@retailshop.com', '22')
+INSERT INTO settings (id, company_name, address, gstin, phone, email, state_code, tamil_blessing)
+VALUES (1, 'Retail Shop Pro', '123 Business Street, City, State - 123456', '22AAAAA0000A1Z5', '+91 9876543210', 'info@retailshop.com', '22', 'உ
+ஸ்ரீ ராம ஜெயம்')
 ON CONFLICT (id) DO NOTHING;
