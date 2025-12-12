@@ -158,11 +158,6 @@ const ReportsManager = {
     // Get GST report
     async getGSTReport(startDate, endDate) {
         const bills = await DB.getBillsByDateRange(startDate, endDate);
-        console.log(`🔍 GST Report: Found ${bills.length} bills between ${startDate} and ${endDate}`);
-
-        if (bills.length > 0) {
-            console.log('🔍 First bill sample:', bills[0]);
-        }
 
         const gstBreakdown = {
             '0': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
@@ -173,22 +168,16 @@ const ReportsManager = {
         };
 
         bills.forEach(bill => {
-            console.log(`🔍 Processing bill ${bill.invoiceNo} with ${bill.items?.length || 0} items`);
             bill.items.forEach(item => {
-                console.log(`🔍 Item:`, item);
                 // FIX: Parse gstRate to remove decimals (e.g., "18.00" -> "18")
                 const rate = Math.floor(parseFloat(item.gstRate)).toString();
                 const itemSubtotal = item.price * item.qty;
                 const gst = calculateGST(itemSubtotal, item.gstRate);
-                console.log(`🔍 Rate: ${rate}%, Subtotal: ${itemSubtotal}, GST:`, gst);
 
                 if (gstBreakdown[rate]) {
                     gstBreakdown[rate].sales += itemSubtotal;
                     gstBreakdown[rate].cgst += gst.cgst;
                     gstBreakdown[rate].sgst += gst.sgst;
-                    console.log(`✅ Added to breakdown[${rate}]:`, gstBreakdown[rate]);
-                } else {
-                    console.warn(`⚠️ GST rate ${rate}% not in breakdown object!`);
                 }
             });
         });
@@ -198,15 +187,11 @@ const ReportsManager = {
 
     // Render GST report
     async renderGSTReport(startDate, endDate) {
-        console.log('🔍 GST Report Debug - Start', { startDate, endDate });
         const gstBreakdown = await this.getGSTReport(startDate, endDate);
-        console.log('🔍 GST Breakdown:', gstBreakdown);
 
         const tbody = document.getElementById('gstTableBody');
-        if (!tbody) {
-            console.error('❌ gstTableBody element not found!');
-            return;
-        }
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
         let totalSales = 0;
@@ -216,7 +201,6 @@ const ReportsManager = {
 
         Object.keys(gstBreakdown).forEach(rate => {
             const data = gstBreakdown[rate];
-            console.log(`🔍 Rate ${rate}%:`, data);
 
             if (data.sales > 0) {
                 totalSales += data.sales;
@@ -234,12 +218,8 @@ const ReportsManager = {
           <td><strong>${formatCurrency(data.cgst + data.sgst)}</strong></td>
         `;
                 tbody.appendChild(tr);
-                console.log(`✅ Added row for ${rate}%`);
             }
         });
-
-        console.log(`🔍 Total rows added: ${rowCount}`);
-        console.log(`🔍 Totals - Sales: ${totalSales}, CGST: ${totalCGST}, SGST: ${totalSGST}`);
 
         // Add total row
         const totalRow = document.createElement('tr');
@@ -254,7 +234,6 @@ const ReportsManager = {
       <td>${formatCurrency(totalCGST + totalSGST)}</td>
     `;
         tbody.appendChild(totalRow);
-        console.log('✅ GST Report rendered successfully');
     },
 
     // Product-wise sales analysis
