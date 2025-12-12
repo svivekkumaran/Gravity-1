@@ -88,9 +88,9 @@ const ProductManager = {
           <div class="form-group">
             <label class="form-label">Measurement Unit *</label>
             <select class="form-select" id="productUnit" required>
-              <option value="number">Number</option>
+              <option value="num">Num</option>
+              <option value="bags">Bags</option>
               <option value="units">Units</option>
-              <option value="liters">Liters</option>
             </select>
           </div>
 
@@ -147,7 +147,7 @@ const ProductManager = {
       document.getElementById('productCategory').value = product.category;
       document.getElementById('productPrice').value = product.price;
       document.getElementById('productStock').value = product.stock;
-      document.getElementById('productUnit').value = product.unit || 'number';
+      document.getElementById('productUnit').value = product.unit || 'num';
       document.getElementById('productGST').value = product.gstRate;
       document.getElementById('productHSN').value = product.hsnCode || '';
       document.getElementById('productMinStock').value = product.minStock;
