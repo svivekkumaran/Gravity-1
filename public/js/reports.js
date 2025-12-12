@@ -283,17 +283,22 @@ const ReportsManager = {
     async exportSalesReport(startDate, endDate) {
         const report = await this.getSalesReport(startDate, endDate);
 
-        const csvData = report.bills.map(bill => ({
-            'Invoice No': bill.invoiceNo,
-            'Date': formatDate(bill.date),
-            'Customer': bill.customerName,
-            'Items': bill.items.length,
-            'Subtotal': bill.subtotal,
-            'CGST': bill.cgst,
-            'SGST': bill.sgst,
-            'Total': bill.total,
-            'Billed By': bill.billedBy || 'N/A'
-        }));
+        // Add date range header rows
+        const csvData = [
+            { 'Field': 'Report Period', 'Value': `${formatDate(startDate)} to ${formatDate(endDate)}` },
+            { 'Field': '', 'Value': '' }, // Empty row
+            ...report.bills.map(bill => ({
+                'Invoice No': bill.invoiceNo,
+                'Date': formatDate(bill.date),
+                'Customer': bill.customerName,
+                'Items': bill.items.length,
+                'Subtotal': bill.subtotal,
+                'CGST': bill.cgst,
+                'SGST': bill.sgst,
+                'Total': bill.total,
+                'Billed By': bill.billedBy || 'N/A'
+            }))
+        ];
 
         exportToCSV(csvData, 'sales_report');
     },
@@ -301,17 +306,23 @@ const ReportsManager = {
     // Export stock report to CSV
     async exportStockReport() {
         const report = await this.getStockReport();
+        const today = getTodayDate();
 
-        const csvData = report.products.map(product => ({
-            'Product Name': product.name,
-            'Category': product.category,
-            'Current Stock': product.stock,
-            'Unit': product.unit || 'units',
-            'Min Stock': product.minStock,
-            'Price': product.price,
-            'GST Rate': product.gstRate + '%',
-            'Stock Value': product.price * product.stock
-        }));
+        // Add date header row
+        const csvData = [
+            { 'Field': 'Report Date', 'Value': formatDate(today) },
+            { 'Field': '', 'Value': '' }, // Empty row
+            ...report.products.map(product => ({
+                'Product Name': product.name,
+                'Category': product.category,
+                'Current Stock': product.stock,
+                'Unit': product.unit || 'units',
+                'Min Stock': product.minStock,
+                'Price': product.price,
+                'GST Rate': product.gstRate + '%',
+                'Stock Value': product.price * product.stock
+            }))
+        ];
 
         exportToCSV(csvData, 'stock_report');
     },
@@ -320,7 +331,12 @@ const ReportsManager = {
     async exportGSTReport(startDate, endDate) {
         const gstBreakdown = await this.getGSTReport(startDate, endDate);
 
-        const csvData = [];
+        // Add date range header rows
+        const csvData = [
+            { 'Field': 'Report Period', 'Value': `${formatDate(startDate)} to ${formatDate(endDate)}` },
+            { 'Field': '', 'Value': '' }, // Empty row
+        ];
+
         let totalSales = 0;
         let totalCGST = 0;
         let totalSGST = 0;
