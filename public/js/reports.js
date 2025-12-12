@@ -176,7 +176,8 @@ const ReportsManager = {
             console.log(`🔍 Processing bill ${bill.invoiceNo} with ${bill.items?.length || 0} items`);
             bill.items.forEach(item => {
                 console.log(`🔍 Item:`, item);
-                const rate = item.gstRate.toString();
+                // FIX: Parse gstRate to remove decimals (e.g., "18.00" -> "18")
+                const rate = Math.floor(parseFloat(item.gstRate)).toString();
                 const itemSubtotal = item.price * item.qty;
                 const gst = calculateGST(itemSubtotal, item.gstRate);
                 console.log(`🔍 Rate: ${rate}%, Subtotal: ${itemSubtotal}, GST:`, gst);
