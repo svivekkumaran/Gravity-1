@@ -305,10 +305,8 @@ const PDFGenerator = {
               </p>
             </div>
             <div class="info-block">
-              ${bill.deliveryAddress ? `
               <h3>Delivery To:</h3>
-              <p>${bill.deliveryAddress}</p>
-              ` : ''}
+              <p>${bill.deliveryAddress || bill.customerAddress || 'Same as Bill To Address'}</p>
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
