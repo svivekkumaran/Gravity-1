@@ -299,14 +299,14 @@ const PDFGenerator = {
               <h3>Bill To:</h3>
               <p>
                 <strong>${bill.customerName}</strong><br>
-                ${bill.customerAddress ? bill.customerAddress + '<br>' : ''}
+                ${bill.customerAddress ? bill.customerAddress.replace(/\n/g, '<br>') + '<br>' : ''}
                 ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
                 ${bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
               </p>
             </div>
             <div class="info-block">
               <h3>Delivery To:</h3>
-              <p>${bill.deliveryAddress || bill.customerAddress || 'Same as Bill To Address'}</p>
+              <p>${(bill.deliveryAddress || bill.customerAddress || 'Same as Bill To Address').replace(/\n/g, '<br>')}</p>
             </div>
             <div class="info-block" style="text-align: right;">
               <p>
