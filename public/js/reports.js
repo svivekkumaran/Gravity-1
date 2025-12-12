@@ -226,12 +226,12 @@ const ReportsManager = {
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-          <td>${rate}%</td>
-          <td class="text-right">${formatCurrency(data.sales)}</td>
-          <td class="text-right">${formatCurrency(data.cgst)}</td>
-          <td class="text-right">${formatCurrency(data.sgst)}</td>
-          <td class="text-right">${formatCurrency(data.igst || 0)}</td>
-          <td class="text-right"><strong>${formatCurrency(data.cgst + data.sgst)}</strong></td>
+          <td class="text-center">${rate}%</td>
+          <td class="text-center">${formatCurrency(data.sales)}</td>
+          <td class="text-center">${formatCurrency(data.cgst)}</td>
+          <td class="text-center">${formatCurrency(data.sgst)}</td>
+          <td class="text-center">${formatCurrency(data.igst || 0)}</td>
+          <td class="text-center"><strong>${formatCurrency(data.cgst + data.sgst)}</strong></td>
         `;
                 tbody.appendChild(tr);
                 console.log(`✅ Added row for ${rate}%`);
@@ -246,12 +246,12 @@ const ReportsManager = {
         totalRow.style.background = 'rgba(102, 126, 234, 0.1)';
         totalRow.style.fontWeight = 'bold';
         totalRow.innerHTML = `
-      <td>Total</td>
-      <td class="text-right">${formatCurrency(totalSales)}</td>
-      <td class="text-right">${formatCurrency(totalCGST)}</td>
-      <td class="text-right">${formatCurrency(totalSGST)}</td>
-      <td class="text-right">${formatCurrency(0)}</td>
-      <td class="text-right">${formatCurrency(totalCGST + totalSGST)}</td>
+      <td class="text-center">Total</td>
+      <td class="text-center">${formatCurrency(totalSales)}</td>
+      <td class="text-center">${formatCurrency(totalCGST)}</td>
+      <td class="text-center">${formatCurrency(totalSGST)}</td>
+      <td class="text-center">${formatCurrency(0)}</td>
+      <td class="text-center">${formatCurrency(totalCGST + totalSGST)}</td>
     `;
         tbody.appendChild(totalRow);
         console.log('✅ GST Report rendered successfully');
