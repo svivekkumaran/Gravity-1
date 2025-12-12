@@ -175,14 +175,19 @@ const ReportsManager = {
         bills.forEach(bill => {
             console.log(`🔍 Processing bill ${bill.invoiceNo} with ${bill.items?.length || 0} items`);
             bill.items.forEach(item => {
+                console.log(`🔍 Item:`, item);
                 const rate = item.gstRate.toString();
                 const itemSubtotal = item.price * item.qty;
                 const gst = calculateGST(itemSubtotal, item.gstRate);
+                console.log(`🔍 Rate: ${rate}%, Subtotal: ${itemSubtotal}, GST:`, gst);
 
                 if (gstBreakdown[rate]) {
                     gstBreakdown[rate].sales += itemSubtotal;
                     gstBreakdown[rate].cgst += gst.cgst;
                     gstBreakdown[rate].sgst += gst.sgst;
+                    console.log(`✅ Added to breakdown[${rate}]:`, gstBreakdown[rate]);
+                } else {
+                    console.warn(`⚠️ GST rate ${rate}% not in breakdown object!`);
                 }
             });
         });
