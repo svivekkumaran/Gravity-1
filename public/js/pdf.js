@@ -4,19 +4,6 @@
 // ============================================
 
 const PDFGenerator = {
-  // Helper function to format tamil blessing (underline first line)
-  formatTamilBlessing(blessing) {
-    if (!blessing) return '';
-    const lines = blessing.split('\n');
-    if (lines.length === 0) return '';
-
-    // Underline the first line, keep rest as-is
-    const firstLine = `<u>${lines[0]}</u>`;
-    const remainingLines = lines.slice(1).join('<br>');
-
-    return remainingLines ? `${firstLine}<br>${remainingLines}` : firstLine;
-  },
-
   // Generate invoice PDF
   async generateInvoice(bill) {
     // Create a new window for printing
@@ -30,7 +17,6 @@ const PDFGenerator = {
     const gstin = settings.gstin || 'GSTIN Number';
     const phone = settings.phone || 'Phone Number';
     const email = settings.email || 'Email Address';
-    const tamilBlessing = settings.tamilBlessing || '';
 
     const invoiceHTML = `
       <!DOCTYPE html>
@@ -56,28 +42,17 @@ const PDFGenerator = {
             max-width: 800px;
             margin: 0 auto;
             border: 2px solid #333;
-            padding: 20px;
+            padding: 30px;
           }
           
           .invoice-header {
-            border-bottom: 3px solid #333;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-            position: relative;
-          }
-          
-          .tamil-blessing {
             text-align: center;
-            font-size: 10px;
-            font-weight: normal;
-            color: #000;
-            margin-bottom: 8px;
-            line-height: 1.4;
-            white-space: pre-line;
+            border-bottom: 3px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
           }
           
           .company-name {
-            text-align: center;
             font-size: 28px;
             font-weight: bold;
             color: #667eea;
@@ -85,32 +60,23 @@ const PDFGenerator = {
           }
           
           .company-details {
-            text-align: center;
             font-size: 12px;
             line-height: 1.6;
             color: #666;
           }
           
           .invoice-title {
-            font-size: 20px;
+            text-align: center;
+            font-size: 24px;
             font-weight: bold;
-            margin: 12px 0;
+            margin: 20px 0;
             color: #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          
-          .invoice-number {
-            font-size: 16px;
-            color: #667eea;
-            font-weight: bold;
           }
           
           .invoice-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
           }
           
           .info-block {
@@ -132,36 +98,22 @@ const PDFGenerator = {
           table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
-            page-break-inside: auto;
-          }
-          
-          thead {
-            display: table-header-group;
-          }
-          
-          tbody {
-            display: table-row-group;
-          }
-          
-          tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
+            margin: 20px 0;
           }
           
           th {
             background: #667eea;
             color: white;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
           }
           
           td {
-            padding: 6px 8px;
+            padding: 10px 12px;
             border-bottom: 1px solid #ddd;
-            font-size: 11px;
+            font-size: 12px;
           }
           
           tr:nth-child(even) {
@@ -179,38 +131,34 @@ const PDFGenerator = {
           .summary-table {
             margin-left: auto;
             width: 300px;
-            margin-top: 10px;
-            page-break-inside: avoid;
+            margin-top: 20px;
           }
           
           .summary-table td {
             border: none;
-            padding: 5px 8px;
+            padding: 8px 12px;
           }
           
           .summary-table .total-row {
             background: #667eea;
             color: white;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
           }
           
           .footer {
-            margin-top: 8px;
-            padding-top: 8px;
+            margin-top: 40px;
+            padding-top: 20px;
             border-top: 2px solid #ddd;
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
             color: #666;
-            page-break-inside: avoid;
           }
           
           .signature-section {
-            margin-top: 15px;
+            margin-top: 60px;
             display: flex;
             justify-content: space-between;
-            page-break-inside: avoid;
-            page-break-before: avoid;
           }
           
           .signature-block {
@@ -220,14 +168,9 @@ const PDFGenerator = {
           .signature-line {
             width: 200px;
             border-top: 1px solid #333;
-            margin-top: 35px;
+            margin-top: 50px;
             padding-top: 5px;
-            font-size: 11px;
-          }
-          
-          @page {
-            margin: 0.5cm;
-            size: A4;
+            font-size: 12px;
           }
           
           @media print {
@@ -240,31 +183,6 @@ const PDFGenerator = {
             .no-print {
               display: none;
             }
-            /* Prevent page breaks */
-            .summary-table,
-            .signature-section,
-            .footer {
-              page-break-inside: avoid;
-            }
-            
-            /* Keep Terms & Conditions with signature */
-            .signature-section {
-              page-break-before: avoid;
-            }
-            
-            /* Allow table to break naturally but keep rows together */
-            table {
-              page-break-inside: auto;
-            }
-            
-            thead {
-              display: table-header-group;
-            }
-            
-            tr {
-              page-break-inside: avoid;
-            }
-            
             /* Fix Chrome color printing */
             * {
               -webkit-print-color-adjust: exact !important;
@@ -278,7 +196,6 @@ const PDFGenerator = {
         <div class="invoice-container">
           <!-- Header -->
           <div class="invoice-header">
-            ${tamilBlessing ? `<div class="tamil-blessing">${this.formatTamilBlessing(tamilBlessing)}</div>` : ''}
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
@@ -288,10 +205,7 @@ const PDFGenerator = {
           </div>
           
           <!-- Invoice Title -->
-          <div class="invoice-title">
-            <span>TAX INVOICE</span>
-            <span class="invoice-number">Invoice No: ${bill.invoiceNo}</span>
-          </div>
+          <div class="invoice-title">TAX INVOICE</div>
           
           <!-- Invoice Info -->
           <div class="invoice-info">
@@ -304,15 +218,10 @@ const PDFGenerator = {
                 ${bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
               </p>
             </div>
-            <div class="info-block">
-              ${bill.deliveryAddress ? `
-              <h3>Delivery To:</h3>
-              <p>${bill.deliveryAddress}</p>
-              ` : ''}
-            </div>
             <div class="info-block" style="text-align: right;">
               <p>
-                <strong>Date:</strong> ${formatDateTime(bill.date)}<br>
+                <strong style="font-size: 16px; color: #667eea;">Invoice No: ${bill.invoiceNo}</strong><br>
+                <strong>Date:</strong> ${formatDate(bill.date)}<br>
                 <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
                 <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
               </p>
@@ -339,19 +248,12 @@ const PDFGenerator = {
       const gst = calculateGST(itemSubtotal, item.gstRate);
       const itemTotal = itemSubtotal + gst.total;
 
-      // Format unit for display - capitalize first letter and handle singular/plural
-      let unitDisplay = item.unit || 'units';
-      if (unitDisplay === 'num') unitDisplay = 'Num';
-      else if (unitDisplay === 'bags') unitDisplay = item.qty === 1 ? 'Bag' : 'Bags';
-      else if (unitDisplay === 'units') unitDisplay = item.qty === 1 ? 'Unit' : 'Units';
-      else unitDisplay = unitDisplay.charAt(0).toUpperCase() + unitDisplay.slice(1);
-
       return `
                   <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
                     <td>${item.hsnCode || 'N/A'}</td>
-                    <td class="text-center">${item.qty} ${unitDisplay}</td>
+                    <td class="text-center">${item.qty}</td>
                     <td class="text-right">${formatCurrency(item.price)}</td>
                     <td class="text-center">${item.gstRate}%</td>
                     <td class="text-right">${formatCurrency(gst.total)}</td>
@@ -382,6 +284,18 @@ const PDFGenerator = {
                 <td class="text-right">${formatCurrency(bill.igst)}</td>
               </tr>
             ` : ''}
+            ${bill.discount > 0 ? `
+              <tr style="color: #f59e0b;">
+                <td>Discount:</td>
+                <td class="text-right">-${formatCurrency(bill.discount)}</td>
+              </tr>
+            ` : ''}
+            ${bill.transportCharge > 0 ? `
+              <tr>
+                <td>Transport Charge:</td>
+                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
+              </tr>
+            ` : ''}
             <tr class="total-row">
               <td>Grand Total:</td>
               <td class="text-right">${formatCurrency(bill.total)}</td>
@@ -390,23 +304,18 @@ const PDFGenerator = {
           
           <!-- Amount in Words -->
           ${bill.amountInWords ? `
-          <div style="margin-top: 10px; padding: 6px; background: #f9f9f9; border-left: 3px solid #667eea; font-size: 11px;">
+          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border-left: 3px solid #667eea;">
             <strong>Amount in Words:</strong> ${bill.amountInWords}
           </div>
           ` : ''}
           
-          <!-- Transport Vehicle (if exists) -->
-          ${bill.transportVehicleNumber ? `
-          <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
-            <p style="margin: 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>
+          <!-- Transport & Billing Notes -->
+          ${bill.transportVehicleNumber || bill.billingNotes ? `
+          <div style="margin-top: 20px; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
+            ${bill.transportVehicleNumber ? `<p style="margin: 0 0 5px 0; font-size: 12px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>` : ''}
+            ${bill.billingNotes ? `<p style="margin: 0; font-size: 12px;"><strong>Notes:</strong> ${bill.billingNotes}</p>` : ''}
           </div>
           ` : ''}
-          
-          <!-- Additional Notes Section (simple text box) -->
-          <div style="margin-top: 8px; padding: 8px; min-height: 30px; page-break-inside: avoid;">
-            <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
-            <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
-          </div>
           
           <!-- Signature Section -->
           <div class="signature-section">
@@ -418,11 +327,15 @@ const PDFGenerator = {
             </div>
           </div>
           
-          <!-- Footer with Terms & Conditions -->
+          <!-- Terms & Conditions (Bottom) -->
+          <div style="margin-top: 30px; padding: 10px; background: #f9f9f9; border-top: 1px solid #ddd;">
+            <p style="margin: 0; font-size: 10px; color: #666; text-align: center;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
+          </div>
+          
+          <!-- Footer -->
           <div class="footer">
-            <p style="margin: 0 0 5px 0;"><strong>Thank you for your business!</strong></p>
-            <p style="margin: 0 0 5px 0;">This is a computer-generated invoice and does not require a physical signature.</p>
-            <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
+            <p><strong>Thank you for your business!</strong></p>
+            <p>This is a computer-generated invoice and does not require a physical signature.</p>
           </div>
           
           <!-- Print Button -->

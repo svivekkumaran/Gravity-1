@@ -1059,9 +1059,8 @@ p {
     padding: 0 var(--spacing-sm);
   }
 
-  /* Hide navbar brand on mobile */
   .navbar-brand {
-    display: none;
+    font-size: 1.25rem;
   }
 
   .navbar-menu {
@@ -1075,9 +1074,9 @@ p {
 
   /* Navbar buttons - smaller for mobile */
   .navbar-menu .btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-    min-height: 32px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    min-height: 36px;
   }
 
   /* Buttons - larger touch targets */

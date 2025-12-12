@@ -160,11 +160,11 @@ const ReportsManager = {
         const bills = await DB.getBillsByDateRange(startDate, endDate);
 
         const gstBreakdown = {
-            '0': { sales: 0, cgst: 0, sgst: 0 },
-            '5': { sales: 0, cgst: 0, sgst: 0 },
-            '12': { sales: 0, cgst: 0, sgst: 0 },
-            '18': { sales: 0, cgst: 0, sgst: 0 },
-            '28': { sales: 0, cgst: 0, sgst: 0 }
+            '0': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
+            '5': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
+            '12': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
+            '18': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
+            '28': { sales: 0, cgst: 0, sgst: 0, igst: 0 }
         };
 
         bills.forEach(bill => {
@@ -209,6 +209,7 @@ const ReportsManager = {
           <td class="text-right">${formatCurrency(data.sales)}</td>
           <td class="text-right">${formatCurrency(data.cgst)}</td>
           <td class="text-right">${formatCurrency(data.sgst)}</td>
+          <td class="text-right">${formatCurrency(data.igst || 0)}</td>
           <td class="text-right"><strong>${formatCurrency(data.cgst + data.sgst)}</strong></td>
         `;
                 tbody.appendChild(tr);
@@ -224,6 +225,7 @@ const ReportsManager = {
       <td class="text-right">${formatCurrency(totalSales)}</td>
       <td class="text-right">${formatCurrency(totalCGST)}</td>
       <td class="text-right">${formatCurrency(totalSGST)}</td>
+      <td class="text-right">${formatCurrency(0)}</td>
       <td class="text-right">${formatCurrency(totalCGST + totalSGST)}</td>
     `;
         tbody.appendChild(totalRow);
