@@ -677,6 +677,10 @@ p {
   text-align: center;
 }
 
+td.text-center {
+  text-align: left;
+}
+
 .text-right {
   text-align: right;
 }
