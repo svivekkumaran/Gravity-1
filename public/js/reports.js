@@ -314,5 +314,48 @@ const ReportsManager = {
         }));
 
         exportToCSV(csvData, 'stock_report');
+    },
+
+    // Export GST report to CSV
+    async exportGSTReport(startDate, endDate) {
+        const gstBreakdown = await this.getGSTReport(startDate, endDate);
+
+        const csvData = [];
+        let totalSales = 0;
+        let totalCGST = 0;
+        let totalSGST = 0;
+        let totalIGST = 0;
+
+        // Add rows for each GST rate with data
+        Object.keys(gstBreakdown).forEach(rate => {
+            const data = gstBreakdown[rate];
+            if (data.sales > 0) {
+                totalSales += data.sales;
+                totalCGST += data.cgst;
+                totalSGST += data.sgst;
+                totalIGST += data.igst || 0;
+
+                csvData.push({
+                    'GST Rate': rate + '%',
+                    'Taxable Amount': data.sales.toFixed(2),
+                    'CGST': data.cgst.toFixed(2),
+                    'SGST': data.sgst.toFixed(2),
+                    'IGST': (data.igst || 0).toFixed(2),
+                    'Total GST': (data.cgst + data.sgst).toFixed(2)
+                });
+            }
+        });
+
+        // Add total row
+        csvData.push({
+            'GST Rate': 'Total',
+            'Taxable Amount': totalSales.toFixed(2),
+            'CGST': totalCGST.toFixed(2),
+            'SGST': totalSGST.toFixed(2),
+            'IGST': totalIGST.toFixed(2),
+            'Total GST': (totalCGST + totalSGST).toFixed(2)
+        });
+
+        exportToCSV(csvData, 'gst_report');
     }
 };

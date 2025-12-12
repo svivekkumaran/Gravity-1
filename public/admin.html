@@ -265,7 +265,13 @@
                 <!-- GST Report -->
                 <div id="gstReport" class="report-tab hidden">
                     <div class="glass-card">
-                        <h3>GST Breakdown by Rate</h3>
+                        <div class="flex-between mb-3">
+                            <h3>GST Breakdown by Rate</h3>
+                            <button class="btn btn-success"
+                                onclick="ReportsManager.exportGSTReport(document.getElementById('reportStartDate').value, document.getElementById('reportEndDate').value)">
+                                Export CSV
+                            </button>
+                        </div>
                         <div class="table-container">
                             <table class="data-table">
                                 <thead>
