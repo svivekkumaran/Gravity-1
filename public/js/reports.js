@@ -158,6 +158,11 @@ const ReportsManager = {
     // Get GST report
     async getGSTReport(startDate, endDate) {
         const bills = await DB.getBillsByDateRange(startDate, endDate);
+        console.log(`🔍 GST Report: Found ${bills.length} bills between ${startDate} and ${endDate}`);
+
+        if (bills.length > 0) {
+            console.log('🔍 First bill sample:', bills[0]);
+        }
 
         const gstBreakdown = {
             '0': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
@@ -168,6 +173,7 @@ const ReportsManager = {
         };
 
         bills.forEach(bill => {
+            console.log(`🔍 Processing bill ${bill.invoiceNo} with ${bill.items?.length || 0} items`);
             bill.items.forEach(item => {
                 const rate = item.gstRate.toString();
                 const itemSubtotal = item.price * item.qty;
