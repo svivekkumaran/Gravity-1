@@ -186,22 +186,31 @@ const ReportsManager = {
 
     // Render GST report
     async renderGSTReport(startDate, endDate) {
+        console.log('🔍 GST Report Debug - Start', { startDate, endDate });
         const gstBreakdown = await this.getGSTReport(startDate, endDate);
+        console.log('🔍 GST Breakdown:', gstBreakdown);
 
         const tbody = document.getElementById('gstTableBody');
+        if (!tbody) {
+            console.error('❌ gstTableBody element not found!');
+            return;
+        }
         tbody.innerHTML = '';
 
         let totalSales = 0;
         let totalCGST = 0;
         let totalSGST = 0;
+        let rowCount = 0;
 
         Object.keys(gstBreakdown).forEach(rate => {
             const data = gstBreakdown[rate];
+            console.log(`🔍 Rate ${rate}%:`, data);
 
             if (data.sales > 0) {
                 totalSales += data.sales;
                 totalCGST += data.cgst;
                 totalSGST += data.sgst;
+                rowCount++;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -213,8 +222,12 @@ const ReportsManager = {
           <td class="text-right"><strong>${formatCurrency(data.cgst + data.sgst)}</strong></td>
         `;
                 tbody.appendChild(tr);
+                console.log(`✅ Added row for ${rate}%`);
             }
         });
+
+        console.log(`🔍 Total rows added: ${rowCount}`);
+        console.log(`🔍 Totals - Sales: ${totalSales}, CGST: ${totalCGST}, SGST: ${totalSGST}`);
 
         // Add total row
         const totalRow = document.createElement('tr');
@@ -229,6 +242,7 @@ const ReportsManager = {
       <td class="text-right">${formatCurrency(totalCGST + totalSGST)}</td>
     `;
         tbody.appendChild(totalRow);
+        console.log('✅ GST Report rendered successfully');
     },
 
     // Product-wise sales analysis
