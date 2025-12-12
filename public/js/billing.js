@@ -273,6 +273,7 @@ const BillingManager = {
     const customerName = document.getElementById('customerName')?.value || 'Walk-in Customer';
     const customerPhone = document.getElementById('customerPhone')?.value || '';
     const customerAddress = document.getElementById('customerAddress')?.value || '';
+    const deliveryAddress = document.getElementById('deliveryAddress')?.value || '';
     const customerGstin = document.getElementById('customerGstin')?.value || '';
     const billingNotes = document.getElementById('billingNotes')?.value || '';
 
@@ -289,6 +290,7 @@ const BillingManager = {
         productId: item.productId,
         name: item.name,
         qty: item.qty,
+        unit: item.unit || 'units',
         price: item.price,
         gstRate: item.gstRate,
         hsnCode: item.hsnCode
@@ -302,6 +304,7 @@ const BillingManager = {
       customerName,
       customerPhone,
       customerAddress,
+      deliveryAddress,
       customerGstin,
       transportVehicleNumber: document.getElementById('transportVehicle')?.value || '',
       billingNotes,
