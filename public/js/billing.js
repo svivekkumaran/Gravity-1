@@ -332,6 +332,9 @@ const BillingManager = {
     if (document.getElementById('customerAddress')) {
       document.getElementById('customerAddress').value = '';
     }
+    if (document.getElementById('deliveryAddress')) {
+      document.getElementById('deliveryAddress').value = '';
+    }
     if (document.getElementById('customerGstin')) {
       document.getElementById('customerGstin').value = '';
     }
