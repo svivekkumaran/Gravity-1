@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
         // POST /api/bills - Create new bill
         if (req.method === 'POST') {
-            const { customerName, customerPhone, customerAddress, customerGstin, deliveryAddress, placeOfSupply, amountInWords, discount, transportVehicleNumber, transportCharge, billingNotes, items, subtotal, cgst, sgst, igst, total, billedBy } = req.body;
+            const { customerName, customerPhone, customerAddress, customerGstin, deliveryAddress, placeOfSupply, amountInWords, discount, transportVehicleNumber, transportCharge, billingNotes, items, subtotal, cgst, sgst, igst, total, billedBy, date } = req.body;
             const billId = `bill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             // Get next invoice number using MAX to avoid race conditions
@@ -97,11 +97,31 @@ module.exports = async (req, res) => {
             let retries = 3;
             let newBill = null;
 
+            // Use provided date or default to NOW()
+            const billDateValue = date ? `${date} ${new Date().toLocaleTimeString('en-US', { hour12: false })}` : 'NOW()';
+            const dateParams = date ? billDateValue : null;
+
             while (retries > 0 && !newBill) {
                 try {
+                    // We need to handle SQL injection carefully here. 
+                    // If date is provided, we pass it as a parameter. If not, we use NOW() in SQL.
+                    // To keep it simple with parameterized queries:
+                    // We'll use a CASE or just simple logic in JS.
+
+                    const queryDate = date ? '$3' : 'NOW()';
+                    // We need to shift all other parameter indices if we insert a custom date at $3
+                    // Actually, let's just use the provided date string or current timestamp string from JS to be consistent
+
+                    const timestamp = date ? new Date(date) : new Date();
+                    // Keep time if it's today, otherwise maybe noon? 
+                    // Let's just use the provided date string extended with current time if it's today, or just date if backdated.
+                    // Ideally user just sends 'YYYY-MM-DD'. We should append current time to avoid Bills all being at 00:00:00.
+
+                    const finalDate = date ? date + ' ' + new Date().toTimeString().split(' ')[0] : new Date().toISOString();
+
                     await db.query(
-                        'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, customer_address, customer_gstin, delivery_address, place_of_supply, amount_in_words, discount, transport_vehicle_number, transport_charge, billing_notes, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)',
-                        [billId, invoiceNo, customerName, customerPhone || '', customerAddress || '', customerGstin || '', deliveryAddress || '', placeOfSupply || 'Tamil Nadu (33)', amountInWords || '', discount || 0, transportVehicleNumber || '', transportCharge || 0, billingNotes || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
+                        'INSERT INTO bills (id, invoice_no, date, customer_name, customer_phone, customer_address, customer_gstin, delivery_address, place_of_supply, amount_in_words, discount, transport_vehicle_number, transport_charge, billing_notes, billed_by, items, subtotal, cgst, sgst, igst, total) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)',
+                        [billId, invoiceNo, finalDate, customerName, customerPhone || '', customerAddress || '', customerGstin || '', deliveryAddress || '', placeOfSupply || 'Tamil Nadu (33)', amountInWords || '', discount || 0, transportVehicleNumber || '', transportCharge || 0, billingNotes || '', billedBy || null, JSON.stringify(items), subtotal, cgst, sgst, igst || 0, total]
                     );
                     newBill = await db.queryOne('SELECT * FROM bills WHERE id = $1', [billId]);
                     break;
