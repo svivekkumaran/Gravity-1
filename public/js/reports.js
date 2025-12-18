@@ -265,7 +265,7 @@ const ReportsManager = {
         // Prepare data as Array of Arrays for flexible CSV format
         const csvData = [
             ['Sales Report'],
-            ['Report Period', `${formatDate(startDate)} to ${formatDate(endDate)}`],
+            [`Report Period: ${formatDate(startDate)} to ${formatDate(endDate)}`],
             [], // Empty row
             // Table Headers
             [
@@ -310,7 +310,7 @@ const ReportsManager = {
 
         const csvData = [
             ['Stock Report'],
-            ['Report Date', formatDate(today)],
+            [`Report Date: ${formatDate(today)}`],
             [],
             // Headers
             [
@@ -340,7 +340,7 @@ const ReportsManager = {
 
         const csvData = [
             ['GST Report'],
-            ['Report Period', `${formatDate(startDate)} to ${formatDate(endDate)}`],
+            [`Report Period: ${formatDate(startDate)} to ${formatDate(endDate)}`],
             [],
             // Headers
             ['GST Rate', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total GST']
