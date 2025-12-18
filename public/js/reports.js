@@ -262,32 +262,42 @@ const ReportsManager = {
     async exportSalesReport(startDate, endDate) {
         const report = await this.getSalesReport(startDate, endDate);
 
-        // Add date range header rows
+        // Prepare data as Array of Arrays for flexible CSV format
         const csvData = [
-            { 'Field': 'Report Period', 'Value': `${formatDate(startDate)} to ${formatDate(endDate)}` },
-            { 'Field': '', 'Value': '' }, // Empty row
-            ...report.bills.map(bill => ({
-                'Invoice No': bill.invoiceNo,
-                'Date': formatDate(bill.date),
-                'Customer Name': bill.customerName,
-                'Customer Phone': bill.customerPhone || '',
-                'Customer Address': bill.customerAddress || '',
-                'Customer GSTIN': bill.customerGstin || '',
-                'Delivery Address': bill.deliveryAddress || '',
-                'Place of Supply': bill.placeOfSupply || '',
-                'Items Count': bill.items.length,
-                'Subtotal': bill.subtotal,
-                'CGST': bill.cgst,
-                'SGST': bill.sgst,
-                'IGST': bill.igst || 0,
-                'Discount': bill.discount || 0,
-                'Transport Vehicle': bill.transportVehicleNumber || '',
-                'Transport Charge': bill.transportCharge || 0,
-                'Total': bill.total,
-                'Amount in Words': bill.amountInWords || '',
-                'Billing Notes': bill.billingNotes || '',
-                'Billed By': bill.billedBy || 'N/A'
-            }))
+            ['Sales Report'],
+            ['Report Period', `${formatDate(startDate)} to ${formatDate(endDate)}`],
+            [], // Empty row
+            // Table Headers
+            [
+                'Invoice No', 'Date', 'Customer Name', 'Customer Phone',
+                'Customer Address', 'Customer GSTIN', 'Delivery Address', 'Place of Supply',
+                'Items Count', 'Subtotal', 'CGST', 'SGST', 'IGST',
+                'Discount', 'Transport Vehicle', 'Transport Charge',
+                'Total', 'Amount in Words', 'Billing Notes', 'Billed By'
+            ],
+            // Table Data
+            ...report.bills.map(bill => [
+                bill.invoiceNo,
+                formatDate(bill.date),
+                bill.customerName,
+                bill.customerPhone || '',
+                bill.customerAddress || '',
+                bill.customerGstin || '',
+                bill.deliveryAddress || '',
+                bill.placeOfSupply || '',
+                bill.items.length,
+                bill.subtotal,
+                bill.cgst,
+                bill.sgst,
+                bill.igst || 0,
+                bill.discount || 0,
+                bill.transportVehicleNumber || '',
+                bill.transportCharge || 0,
+                bill.total,
+                bill.amountInWords || '',
+                bill.billingNotes || '',
+                bill.billedBy || 'N/A'
+            ])
         ];
 
         exportToCSV(csvData, 'sales_report');
@@ -298,21 +308,27 @@ const ReportsManager = {
         const report = await this.getStockReport();
         const today = getTodayDate();
 
-        // Add date header row
         const csvData = [
-            { 'Field': 'Report Date', 'Value': formatDate(today) },
-            { 'Field': '', 'Value': '' }, // Empty row
-            ...report.products.map(product => ({
-                'Product Name': product.name,
-                'Category': product.category,
-                'HSN Code': product.hsnCode || '',
-                'Current Stock': product.stock,
-                'Unit': product.unit || 'units',
-                'Min Stock': product.minStock,
-                'Price': product.price,
-                'GST Rate': product.gstRate + '%',
-                'Stock Value': product.price * product.stock
-            }))
+            ['Stock Report'],
+            ['Report Date', formatDate(today)],
+            [],
+            // Headers
+            [
+                'Product Name', 'Category', 'HSN Code', 'Current Stock',
+                'Unit', 'Min Stock', 'Price', 'GST Rate', 'Stock Value'
+            ],
+            // Data
+            ...report.products.map(product => [
+                product.name,
+                product.category,
+                product.hsnCode || '',
+                product.stock,
+                product.unit || 'units',
+                product.minStock,
+                product.price,
+                product.gstRate + '%',
+                product.price * product.stock
+            ])
         ];
 
         exportToCSV(csvData, 'stock_report');
@@ -322,10 +338,12 @@ const ReportsManager = {
     async exportGSTReport(startDate, endDate) {
         const gstBreakdown = await this.getGSTReport(startDate, endDate);
 
-        // Add date range header rows
         const csvData = [
-            { 'Field': 'Report Period', 'Value': `${formatDate(startDate)} to ${formatDate(endDate)}` },
-            { 'Field': '', 'Value': '' }, // Empty row
+            ['GST Report'],
+            ['Report Period', `${formatDate(startDate)} to ${formatDate(endDate)}`],
+            [],
+            // Headers
+            ['GST Rate', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total GST']
         ];
 
         let totalSales = 0;
@@ -333,7 +351,7 @@ const ReportsManager = {
         let totalSGST = 0;
         let totalIGST = 0;
 
-        // Add rows for each GST rate with data
+        // Add data rows
         Object.keys(gstBreakdown).forEach(rate => {
             const data = gstBreakdown[rate];
             if (data.sales > 0) {
@@ -342,26 +360,26 @@ const ReportsManager = {
                 totalSGST += data.sgst;
                 totalIGST += data.igst || 0;
 
-                csvData.push({
-                    'GST Rate': rate + '%',
-                    'Taxable Amount': data.sales.toFixed(2),
-                    'CGST': data.cgst.toFixed(2),
-                    'SGST': data.sgst.toFixed(2),
-                    'IGST': (data.igst || 0).toFixed(2),
-                    'Total GST': (data.cgst + data.sgst).toFixed(2)
-                });
+                csvData.push([
+                    rate + '%',
+                    data.sales.toFixed(2),
+                    data.cgst.toFixed(2),
+                    data.sgst.toFixed(2),
+                    (data.igst || 0).toFixed(2),
+                    (data.cgst + data.sgst).toFixed(2)
+                ]);
             }
         });
 
         // Add total row
-        csvData.push({
-            'GST Rate': 'Total',
-            'Taxable Amount': totalSales.toFixed(2),
-            'CGST': totalCGST.toFixed(2),
-            'SGST': totalSGST.toFixed(2),
-            'IGST': totalIGST.toFixed(2),
-            'Total GST': (totalCGST + totalSGST).toFixed(2)
-        });
+        csvData.push([
+            'Total',
+            totalSales.toFixed(2),
+            totalCGST.toFixed(2),
+            totalSGST.toFixed(2),
+            totalIGST.toFixed(2),
+            (totalCGST + totalSGST).toFixed(2)
+        ]);
 
         exportToCSV(csvData, 'gst_report');
     }

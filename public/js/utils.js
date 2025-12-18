@@ -248,22 +248,41 @@ function exportToCSV(data, filename) {
         return;
     }
 
-    const headers = Object.keys(data[0]);
-    const csv = [
-        headers.join(','),
-        ...data.map(row =>
-            headers.map(header => {
-                const value = row[header];
-                // Escape quotes and wrap in quotes if contains comma
-                if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+    let csvContent = '';
+
+    // Check if data is array of arrays (flexible format) or array of objects (strict format)
+    if (Array.isArray(data[0])) {
+        csvContent = data.map(row =>
+            row.map(cell => {
+                if (cell === null || cell === undefined) return '';
+                const value = String(cell);
+                // Escape quotes and wrap in quotes if contains comma or quote
+                if (value.includes(',') || value.includes('"') || value.includes('\n')) {
                     return `"${value.replace(/"/g, '""')}"`;
                 }
                 return value;
             }).join(',')
-        )
-    ].join('\n');
+        ).join('\n');
+    } else {
+        // Legacy support: Array of objects
+        const headers = Object.keys(data[0]);
+        csvContent = [
+            headers.join(','),
+            ...data.map(row =>
+                headers.map(header => {
+                    const value = row[header];
+                    if (value === null || value === undefined) return '';
+                    const strValue = String(value);
+                    if (strValue.includes(',') || strValue.includes('"')) {
+                        return `"${strValue.replace(/"/g, '""')}"`;
+                    }
+                    return strValue;
+                }).join(',')
+            )
+        ].join('\n');
+    }
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
