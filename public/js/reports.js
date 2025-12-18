@@ -269,12 +269,23 @@ const ReportsManager = {
             ...report.bills.map(bill => ({
                 'Invoice No': bill.invoiceNo,
                 'Date': formatDate(bill.date),
-                'Customer': bill.customerName,
-                'Items': bill.items.length,
+                'Customer Name': bill.customerName,
+                'Customer Phone': bill.customerPhone || '',
+                'Customer Address': bill.customerAddress || '',
+                'Customer GSTIN': bill.customerGstin || '',
+                'Delivery Address': bill.deliveryAddress || '',
+                'Place of Supply': bill.placeOfSupply || '',
+                'Items Count': bill.items.length,
                 'Subtotal': bill.subtotal,
                 'CGST': bill.cgst,
                 'SGST': bill.sgst,
+                'IGST': bill.igst || 0,
+                'Discount': bill.discount || 0,
+                'Transport Vehicle': bill.transportVehicleNumber || '',
+                'Transport Charge': bill.transportCharge || 0,
                 'Total': bill.total,
+                'Amount in Words': bill.amountInWords || '',
+                'Billing Notes': bill.billingNotes || '',
                 'Billed By': bill.billedBy || 'N/A'
             }))
         ];
@@ -294,6 +305,7 @@ const ReportsManager = {
             ...report.products.map(product => ({
                 'Product Name': product.name,
                 'Category': product.category,
+                'HSN Code': product.hsnCode || '',
                 'Current Stock': product.stock,
                 'Unit': product.unit || 'units',
                 'Min Stock': product.minStock,
