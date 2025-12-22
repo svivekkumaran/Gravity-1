@@ -84,11 +84,11 @@ module.exports = async (req, res) => {
             let nextNum = 1;
             if (result && result.invoice_no) {
                 // Extract the number from the last invoice (e.g., "INV202500014" -> 14)
-                const lastNum = parseInt(result.invoice_no.replace(`INV${year}`, ''));
+                const lastNum = parseInt(result.invoice_no.replace(`${prefix}${year}`, ''));
                 nextNum = lastNum + 1;
             }
 
-            const invoiceNo = `INV${year}${String(nextNum).padStart(5, '0')}`;
+            let invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`; // Changed const to let for retry logic
 
             // Update stock for each item
             for (const item of items) {
@@ -136,7 +136,7 @@ module.exports = async (req, res) => {
                         retries--;
                         const timestamp = Date.now();
                         nextNum = parseInt(String(timestamp).slice(-5));
-                        invoiceNo = `INV${year}${String(nextNum).padStart(5, '0')}`;
+                        invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
                     } else {
                         throw error;
                     }
