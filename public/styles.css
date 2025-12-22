@@ -184,6 +184,12 @@ p {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.glass-card.no-hover:hover {
+  transform: none;
+  box-shadow: var(--glass-shadow);
+  border-color: var(--glass-border);
+}
+
 /* ============================================
    BUTTONS
    ============================================ */
