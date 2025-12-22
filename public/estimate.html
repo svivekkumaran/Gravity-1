@@ -5,7 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estimate Billing - Retail Shop Pro</title>
-    <!-- ... skipping head ... -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">🛒 Retail Shop Pro</div>
+            <div class="navbar-menu">
+                <span id="userDisplay" style="color: var(--text-secondary);"></span>
+                <a href="admin.html" class="btn btn-outline" id="homeButton"
+                    style="text-decoration: none; margin-right: 0.5rem;" title="Go to Dashboard">
+                    🏠 Home
+                </a>
+                <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
     <div class="container" style="padding-top: 2rem;">
         <div class="flex-between mb-3">
             <h1>Estimate Billing</h1>
@@ -113,6 +135,6 @@
         // Initialize billing
         EstimateManager.init();
     </script>
-    </body>
+</body>
 
 </html>
