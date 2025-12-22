@@ -4,8 +4,16 @@
 
 const ReportsManager = {
     // Get sales report for date range
-    async getSalesReport(startDate, endDate) {
-        const bills = await DB.getBillsByDateRange(startDate, endDate);
+    async getSalesReport(startDate, endDate, filterType = 'ALL') {
+        const allBills = await DB.getBillsByDateRange(startDate, endDate);
+
+        // Filter based on type
+        const bills = allBills.filter(bill => {
+            const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
+            if (filterType === 'GST') return !isEstimate;
+            if (filterType === 'ESTIMATE') return isEstimate;
+            return true; // ALL
+        });
 
         let totalSales = 0;
         let totalGST = 0;
@@ -32,8 +40,8 @@ const ReportsManager = {
     },
 
     // Render sales report
-    async renderSalesReport(startDate, endDate) {
-        const report = await this.getSalesReport(startDate, endDate);
+    async renderSalesReport(startDate, endDate, filterType = 'ALL') {
+        const report = await this.getSalesReport(startDate, endDate, filterType);
 
         // Update summary cards
         document.getElementById('totalBills').textContent = report.totalBills;
@@ -157,7 +165,13 @@ const ReportsManager = {
 
     // Get GST report
     async getGSTReport(startDate, endDate) {
-        const bills = await DB.getBillsByDateRange(startDate, endDate);
+        const allBills = await DB.getBillsByDateRange(startDate, endDate);
+
+        // Filter out estimates - GST report should ONLY show GST bills
+        const bills = allBills.filter(bill => {
+            const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
+            return !isEstimate; // Only exclude estimates
+        });
 
         const gstBreakdown = {
             '0': { sales: 0, cgst: 0, sgst: 0, igst: 0 },
@@ -259,13 +273,14 @@ const ReportsManager = {
     },
 
     // Export report to CSV
-    async exportSalesReport(startDate, endDate) {
-        const report = await this.getSalesReport(startDate, endDate);
+    async exportSalesReport(startDate, endDate, filterType = 'ALL') {
+        const report = await this.getSalesReport(startDate, endDate, filterType);
 
         // Prepare data as Array of Arrays for flexible CSV format
         const csvData = [
             ['Sales Report'],
             [`Report Period: ${formatDate(startDate)} to ${formatDate(endDate)}`],
+            [`Filter: ${filterType}`],
             [], // Empty row
             // Table Headers
             [

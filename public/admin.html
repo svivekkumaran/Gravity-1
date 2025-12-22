@@ -149,7 +149,7 @@
 
                 <!-- Date Range Selector -->
                 <div class="glass-card mb-3">
-                    <div class="grid grid-3">
+                    <div class="grid grid-4">
                         <div class="form-group">
                             <label class="form-label">From Date</label>
                             <input type="date" class="form-input" id="reportStartDate">
@@ -157,6 +157,14 @@
                         <div class="form-group">
                             <label class="form-label">To Date</label>
                             <input type="date" class="form-input" id="reportEndDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Filter Bills</label>
+                            <select class="form-input" id="reportTypeFilter">
+                                <option value="ALL">All Bills</option>
+                                <option value="GST">GST Bills Only</option>
+                                <option value="ESTIMATE">Estimates Only</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">&nbsp;</label>
@@ -199,7 +207,7 @@
                         <div class="flex-between mb-3">
                             <h3>Sales Details</h3>
                             <button class="btn btn-success"
-                                onclick="ReportsManager.exportSalesReport(document.getElementById('reportStartDate').value, document.getElementById('reportEndDate').value)">
+                                onclick="ReportsManager.exportSalesReport(document.getElementById('reportStartDate').value, document.getElementById('reportEndDate').value, document.getElementById('reportTypeFilter').value)">
                                 Export CSV
                             </button>
                         </div>
@@ -499,8 +507,9 @@
         async function loadReports() {
             const startDate = document.getElementById('reportStartDate').value;
             const endDate = document.getElementById('reportEndDate').value;
+            const filterType = document.getElementById('reportTypeFilter').value;
 
-            await ReportsManager.renderSalesReport(startDate, endDate);
+            await ReportsManager.renderSalesReport(startDate, endDate, filterType);
             await ReportsManager.renderStockReport();
             await ReportsManager.renderGSTReport(startDate, endDate);
         }
