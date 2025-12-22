@@ -36,13 +36,15 @@ module.exports = async (req, res) => {
             }
 
             if (nextInvoice === 'true') {
+                const { type } = req.query;
+                const prefix = type === 'ESTIMATE' ? 'EST' : 'INV';
                 const year = new Date().getFullYear();
                 const bills = await db.queryAll(
                     'SELECT invoice_no FROM bills WHERE invoice_no LIKE $1',
-                    [`INV${year}%`]
+                    [`${prefix}${year}%`]
                 );
                 const nextNum = bills.length + 1;
-                const invoiceNo = `INV${year}${String(nextNum).padStart(5, '0')}`;
+                const invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
                 return res.json({ invoiceNo });
             }
 
@@ -63,8 +65,11 @@ module.exports = async (req, res) => {
 
         // POST /api/bills - Create new bill
         if (req.method === 'POST') {
-            const { customerName, customerPhone, customerAddress, customerGstin, deliveryAddress, placeOfSupply, amountInWords, discount, transportVehicleNumber, transportCharge, billingNotes, items, subtotal, cgst, sgst, igst, total, billedBy, date } = req.body;
+            const { type, customerName, customerPhone, customerAddress, customerGstin, deliveryAddress, placeOfSupply, amountInWords, discount, transportVehicleNumber, transportCharge, billingNotes, items, subtotal, cgst, sgst, igst, total, billedBy, date } = req.body;
             const billId = `bill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // Determine prefix based on type
+            const prefix = type === 'ESTIMATE' ? 'EST' : 'INV';
 
             // Get next invoice number using MAX to avoid race conditions
             const year = new Date().getFullYear();
@@ -73,7 +78,7 @@ module.exports = async (req, res) => {
                  WHERE invoice_no LIKE $1 
                  ORDER BY invoice_no DESC 
                  LIMIT 1`,
-                [`INV${year}%`]
+                [`${prefix}${year}%`]
             );
 
             let nextNum = 1;
