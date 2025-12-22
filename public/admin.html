@@ -149,16 +149,16 @@
 
                 <!-- Date Range Selector -->
                 <div class="glass-card mb-3">
-                    <div class="grid grid-4">
-                        <div class="form-group">
+                    <div class="flex gap-2" style="align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
                             <label class="form-label">From Date</label>
                             <input type="date" class="form-input" id="reportStartDate">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
                             <label class="form-label">To Date</label>
                             <input type="date" class="form-input" id="reportEndDate">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
                             <label class="form-label">Filter Bills</label>
                             <select class="form-input" id="reportTypeFilter">
                                 <option value="ALL">All Bills</option>
@@ -166,7 +166,7 @@
                                 <option value="ESTIMATE">Estimates Only</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
                             <label class="form-label">&nbsp;</label>
                             <button class="btn btn-primary" style="width: 100%;" onclick="loadReports()">
                                 Generate Reports
