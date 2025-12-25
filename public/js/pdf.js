@@ -98,7 +98,6 @@ const PDFGenerator = {
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
-              ${address}<br>
               ${!isEstimate ? `GSTIN: ${gstin} | ` : ''}Phone: ${phone}<br>
               ${!isEstimate ? `Email: ${email}` : ''}
             </div>
