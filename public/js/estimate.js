@@ -143,6 +143,22 @@ const EstimateManager = {
     this.renderCart();
   },
 
+  // Update cart item price
+  updateCartPrice(productId, newPrice) {
+    const item = this.cart.find(item => item.productId === productId);
+
+    if (!item) return;
+
+    if (isNaN(newPrice) || newPrice < 0) {
+      showToast('Invalid price', 'error');
+      this.renderCart(); // Re-render to reset invalid input
+      return;
+    }
+
+    item.price = newPrice;
+    this.renderCart();
+  },
+
   // Remove from cart
   removeFromCart(productId) {
     this.cart = this.cart.filter(item => item.productId !== productId);
@@ -183,10 +199,18 @@ const EstimateManager = {
           <div style="flex: 1;">
             <strong>${item.name}</strong>
             <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">
-              ${formatCurrency(item.price)} × ${item.qty} ${unit} = ${formatCurrency(subtotal)}
+              ${item.qty} ${unit} × 
             </p>
           </div>
+          </div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
+             <input 
+              type="number" 
+              value="${item.price}" 
+              onchange="EstimateManager.updateCartPrice('${item.productId}', parseFloat(this.value))"
+              style="width: 80px; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 6px; color: white; text-align: right;"
+              placeholder="Price"
+            >
             <input 
               type="number" 
               min="1" 
@@ -195,6 +219,9 @@ const EstimateManager = {
               onchange="EstimateManager.updateCartQty('${item.productId}', parseInt(this.value))"
               style="width: 60px; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 6px; color: white; text-align: center;"
             >
+            <div style="min-width: 80px; text-align: right; font-weight: bold;">
+                ${formatCurrency(subtotal)}
+            </div>
             <button 
               class="btn btn-danger" 
               style="padding: 0.5rem 0.75rem;"

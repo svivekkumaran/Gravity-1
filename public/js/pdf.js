@@ -98,8 +98,9 @@ const PDFGenerator = {
             <div class="company-name">${companyName}</div>
             <div class="company-details">
               ${address}<br>
-              GSTIN: ${gstin} | Phone: ${phone}<br>
-              Email: ${email}
+              ${address}<br>
+              ${!isEstimate ? `GSTIN: ${gstin} | ` : ''}Phone: ${phone}<br>
+              ${!isEstimate ? `Email: ${email}` : ''}
             </div>
           </div>
           
@@ -140,7 +141,7 @@ const PDFGenerator = {
               <tr>
                 <th>S.No</th>
                 <th>Product Name</th>
-                <th>HSN</th>
+                ${!isEstimate ? '<th>HSN</th>' : ''}
                 <th class="text-center">Qty</th>
                 <th class="text-right">Price</th>
                 ${!isEstimate ? `
@@ -167,7 +168,7 @@ const PDFGenerator = {
                   <tr>
                     <td>${index + 1}</td>
                     <td>${item.name}</td>
-                    <td>${item.hsnCode || 'N/A'}</td>
+                    ${!isEstimate ? `<td>${item.hsnCode || 'N/A'}</td>` : ''}
                     <td class="text-center">${item.qty} ${unitDisplay}</td>
                     <td class="text-right">${formatCurrency(item.price)}</td>
                     ${!isEstimate ? `
