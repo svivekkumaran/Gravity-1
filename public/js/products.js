@@ -91,6 +91,7 @@ const ProductManager = {
               <option value="num">Num</option>
               <option value="bags">Bags</option>
               <option value="units">Units</option>
+              <option value="tons">Tons</option>
             </select>
           </div>
 

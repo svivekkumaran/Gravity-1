@@ -141,6 +141,23 @@ const BillingManager = {
     }
 
     item.qty = newQty;
+    item.qty = newQty;
+    this.renderCart();
+  },
+
+  // Update cart item price
+  updateCartPrice(productId, newPrice) {
+    const item = this.cart.find(item => item.productId === productId);
+
+    if (!item) return;
+
+    if (newPrice < 0) {
+      showToast('Price cannot be negative', 'warning');
+      this.renderCart(); // Reset to valid value
+      return;
+    }
+
+    item.price = newPrice;
     this.renderCart();
   },
 
@@ -186,7 +203,18 @@ const BillingManager = {
           <div style="flex: 1;">
             <strong>${item.name}</strong>
             <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">
-              ${formatCurrency(item.price)} × ${item.qty} ${unit} = ${formatCurrency(subtotal)}
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01"
+                  value="${item.price}" 
+                  onchange="BillingManager.updateCartPrice('${item.productId}', parseFloat(this.value))"
+                  style="width: 80px; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 4px; color: white; font-size: 0.9rem;"
+                  placeholder="Price"
+                >
+                <span class="text-muted">× ${item.qty} ${unit} = ${formatCurrency(subtotal)}</span>
+              </div>
             </p>
             <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
               GST ${item.gstRate}%: ${formatCurrency(gst.total)}
