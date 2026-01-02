@@ -127,7 +127,7 @@ const PDFGenerator = {
             </div> ` : '<div class="info-block"></div>'}
             <div class="info-block" style="text-align: right;">
               <p>
-                <strong>Date:</strong> ${formatDateTime(bill.date)}<br>
+                <strong>Date:</strong> ${formatDate(bill.date)}<br>
                 <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
                 <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
               </p>
