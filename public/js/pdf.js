@@ -207,34 +207,40 @@ const PDFGenerator = {
                 <td class="text-right">${formatCurrency(bill.igst)}</td>
               </tr>
             ` : ''}
+            <tr>
+              <td>Round Off:</td>
+              <td class="text-right">${formatCurrency(bill.roundOff || (Math.round(bill.subtotal + bill.cgst + bill.sgst + bill.igst) - (bill.subtotal + bill.cgst + bill.sgst + bill.igst)))}</td>
+            </tr>
             <tr class="total-row">
               <td>Grand Total:</td>
               <td class="text-right">${formatCurrency(bill.total)}</td>
             </tr>
             `}
-          </table>
+          </table >
           
-          <!-- Amount in Words -->
-          ${bill.amountInWords ? `
+          < !--Amount in Words-- >
+  ${bill.amountInWords ? `
           <div style="margin-top: 10px; padding: 6px; background: #f9f9f9; border-left: 3px solid #667eea; font-size: 11px;">
             <strong>Amount in Words:</strong> ${bill.amountInWords}
           </div>
-          ` : ''}
+          ` : ''
+      }
           
-          <!-- Transport Vehicle (if exists) -->
-          ${bill.transportVehicleNumber ? `
+          < !--Transport Vehicle(if exists) -->
+  ${bill.transportVehicleNumber ? `
           <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
             <p style="margin: 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>
           </div>
-          ` : ''}
+          ` : ''
+      }
           
-          <!-- Additional Notes Section (simple text box) -->
+          < !--Additional Notes Section(simple text box)-- >
           <div style="margin-top: 8px; padding: 8px; min-height: 30px; page-break-inside: avoid;">
             <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
             <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
           </div>
           
-          <!-- Signature Section -->
+          <!--Signature Section-- >
           <div class="signature-section">
             <div class="signature-block">
               <div class="signature-line">Customer Signature</div>
@@ -244,26 +250,26 @@ const PDFGenerator = {
             </div>
           </div>
           
-          <!-- Footer with Terms & Conditions -->
+          <!--Footer with Terms & Conditions-- >
           <div class="footer">
             <p style="margin: 0 0 5px 0;"><strong>Thank you for your business!</strong></p>
             <p style="margin: 0 0 5px 0;">This is a computer-generated invoice and does not require a physical signature.</p>
             <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
           </div>
           
-          <!-- Print Button -->
-          <div style="text-align: center; margin-top: 30px;" class="no-print">
-            <button onclick="window.print()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px;">
-              Print Invoice
-            </button>
-            <button onclick="window.close()" style="padding: 12px 30px; background: #666; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
-              Close
-            </button>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+          <!--Print Button-- >
+  <div style="text-align: center; margin-top: 30px;" class="no-print">
+    <button onclick="window.print()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px;">
+      Print Invoice
+    </button>
+    <button onclick="window.close()" style="padding: 12px 30px; background: #666; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
+      Close
+    </button>
+  </div>
+        </div >
+      </body >
+      </html >
+  `;
 
     printWindow.document.write(invoiceHTML);
     printWindow.document.close();

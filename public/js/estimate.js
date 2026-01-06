@@ -250,9 +250,13 @@ const EstimateManager = {
 
     // Update summary display
     const summaryHTML = `
+      <div class="summary-row">
+        <span>Round Off:</span>
+        <strong>${formatCurrency(Math.round(total) - total)}</strong>
+      </div>
       <div class="summary-row total">
         <span>Total:</span>
-        <strong>${formatCurrency(total)}</strong>
+        <strong>${formatCurrency(Math.round(total))}</strong>
       </div>
     `;
 
@@ -267,7 +271,8 @@ const EstimateManager = {
       cgst: 0,
       sgst: 0,
       igst: 0,
-      total
+      roundOff: Math.round(total) - total,
+      total: Math.round(total)
     };
   },
 
@@ -307,6 +312,7 @@ const EstimateManager = {
       cgst: 0,
       sgst: 0,
       igst: 0,
+      roundOff: this.currentBill.roundOff,
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,

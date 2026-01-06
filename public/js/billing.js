@@ -276,9 +276,13 @@ const BillingManager = {
         <span>SGST:</span>
         <strong>${formatCurrency(totalSGST)}</strong>
       </div>
+      <div class="summary-row">
+        <span>Round Off:</span>
+        <strong>${formatCurrency(Math.round(total) - total)}</strong>
+      </div>
       <div class="summary-row total">
         <span>Total:</span>
-        <strong>${formatCurrency(total)}</strong>
+        <strong>${formatCurrency(Math.round(total))}</strong>
       </div>
     `;
 
@@ -293,7 +297,8 @@ const BillingManager = {
       cgst: totalCGST,
       sgst: totalSGST,
       igst: totalIGST,
-      total
+      roundOff: Math.round(total) - total,
+      total: Math.round(total)
     };
   },
 
@@ -334,6 +339,7 @@ const BillingManager = {
       cgst: this.currentBill.cgst,
       sgst: this.currentBill.sgst,
       igst: this.currentBill.igst,
+      roundOff: this.currentBill.roundOff,
       total: this.currentBill.total,
       billedBy: billedByName,
       customerName,
