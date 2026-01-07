@@ -82,10 +82,19 @@ const ReportsManager = {
             },
             {
                 field: 'actions',
-                label: 'Actions',
+                label: 'View',
                 render: (bill) => `
           <button class="btn btn-primary" style="padding: 0.5rem 1rem;" onclick="(async () => { const b = await DB.getBillById('${bill.id}'); PDFGenerator.generateInvoice(b); })()">
-            View Invoice
+            View
+          </button>
+        `
+            },
+            {
+                field: 'download',
+                label: 'Download',
+                render: (bill) => `
+          <button class="btn btn-outline" style="padding: 0.5rem 1rem;" onclick="(async () => { const b = await DB.getBillById('${bill.id}'); PDFGenerator.generateInvoice(b); })()">
+            <i class="fas fa-file-pdf"></i> Download
           </button>
         `
             }
