@@ -3,6 +3,11 @@
 // Uses jsPDF library
 // ============================================
 
+// ============================================
+// PDF GENERATION MODULE
+// Uses jsPDF library (via html2pdf)
+// ============================================
+
 const PDFGenerator = {
   // Helper function to format tamil blessing (underline first line)
   formatTamilBlessing(blessing) {
@@ -17,11 +22,8 @@ const PDFGenerator = {
     return remainingLines ? `${firstLine}<br>${remainingLines}` : firstLine;
   },
 
-  // Generate invoice PDF
-  async generateInvoice(bill) {
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-
+  // Generate HTML for invoice
+  async generateInvoiceHTML(bill) {
     const settings = await DB.getSettings();
 
     // Provide fallback values to prevent "undefined" in PDF
@@ -36,25 +38,27 @@ const PDFGenerator = {
     const invoiceTitle = isEstimate ? 'ESTIMATE' : 'TAX INVOICE';
 
     // Calculate valid values for display, handling missing fields in old bills
-    const subtotal = bill.subtotal || 0;
-    const cgst = bill.cgst || 0;
-    const sgst = bill.sgst || 0;
-    const igst = bill.igst || 0;
+    // Use parseFloat to Ensure numbers, default to 0 if NaN
+    const subtotal = parseFloat(bill.subtotal) || 0;
+    const cgst = parseFloat(bill.cgst) || 0;
+    const sgst = parseFloat(bill.sgst) || 0;
+    const igst = parseFloat(bill.igst) || 0;
     const taxTotal = subtotal + cgst + sgst + igst;
 
     let displayRoundOff, displayTotal;
 
-    if (bill.roundOff !== undefined && bill.roundOff !== null) {
-      displayRoundOff = bill.roundOff;
-      displayTotal = bill.total;
+    // Strict check for valid roundOff
+    if (bill.roundOff !== undefined && bill.roundOff !== null && !isNaN(parseFloat(bill.roundOff))) {
+      displayRoundOff = parseFloat(bill.roundOff);
+      displayTotal = parseFloat(bill.total) || (taxTotal + displayRoundOff);
     } else {
-      // Calculate for old bills
+      // Calculate for old bills or missing roundOff
       const roundedTotal = Math.round(taxTotal);
       displayRoundOff = roundedTotal - taxTotal;
       displayTotal = roundedTotal;
     }
 
-    const invoiceHTML = `
+    return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -66,7 +70,6 @@ const PDFGenerator = {
             padding: 0;
             box-sizing: border-box;
           }
-          /* ... styles omitted for brevity ... */
           body { font-family: 'Arial', sans-serif; padding: 20px; color: #333; background: white; }
           .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #333; padding: 20px; }
           .invoice-header { border-bottom: 3px solid #333; padding-bottom: 12px; margin-bottom: 12px; position: relative; }
@@ -110,7 +113,7 @@ const PDFGenerator = {
         </style>
       </head>
       <body>
-        <div class="invoice-container">
+        <div class="invoice-container" id="invoice">
           <!-- Header -->
           <div class="invoice-header">
             ${tamilBlessing ? `<div class="tamil-blessing">${this.formatTamilBlessing(tamilBlessing)}</div>` : ''}
@@ -210,20 +213,20 @@ const PDFGenerator = {
             ` : `
             <tr>
               <td>Subtotal:</td>
-              <td class="text-right"><strong>${formatCurrency(bill.subtotal)}</strong></td>
+              <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
             </tr>
             <tr>
               <td>CGST:</td>
-              <td class="text-right">${formatCurrency(bill.cgst)}</td>
+              <td class="text-right">${formatCurrency(cgst)}</td>
             </tr>
             <tr>
               <td>SGST:</td>
-              <td class="text-right">${formatCurrency(bill.sgst)}</td>
+              <td class="text-right">${formatCurrency(sgst)}</td>
             </tr>
-            ${bill.igst > 0 ? `
+            ${igst > 0 ? `
               <tr>
                 <td>IGST:</td>
-                <td class="text-right">${formatCurrency(bill.igst)}</td>
+                <td class="text-right">${formatCurrency(igst)}</td>
               </tr>
             ` : ''}
             <tr>
@@ -276,7 +279,7 @@ const PDFGenerator = {
             <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
           </div>
           
-          <!-- Print Button -->
+          <!-- Print Button (Only visible in Print Window) -->
   <div style="text-align: center; margin-top: 30px;" class="no-print">
     <button onclick="window.print()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px;">
       Print Invoice
@@ -289,16 +292,77 @@ const PDFGenerator = {
       </body >
       </html >
   `;
+  },
 
+  // Generate and open invoice (Print view)
+  async generateInvoice(bill) {
+    const printWindow = window.open('', '_blank');
+    const invoiceHTML = await this.generateInvoiceHTML(bill);
     printWindow.document.write(invoiceHTML);
     printWindow.document.close();
 
     // Fix Safari empty page issue - wait for content to load before showing
     printWindow.onload = function () {
-      // Small delay to ensure rendering is complete
       setTimeout(function () {
         printWindow.focus();
       }, 100);
     };
+  },
+
+  // Download invoice as PDF
+  async downloadInvoice(bill) {
+    // Generate HTML
+    const invoiceHTML = await this.generateInvoiceHTML(bill);
+
+    // Create a temporary container
+    const container = document.createElement('div');
+    container.innerHTML = invoiceHTML;
+
+    // Remove the print buttons before converting
+    const noPrint = container.querySelector('.no-print');
+    if (noPrint) noPrint.remove();
+
+    // The actual invoice content
+    const element = container.querySelector('.invoice-container');
+
+    // We need to temporarily append to body to ensure styles render correctly for html2pdf
+    // But since we are extracting inline styles, we can just pass the element if it has all styles.
+    // However, html2pdf works best with live DOM elements.
+
+    // Better approach for html2pdf with custom styles:
+    // Create an iframe to render the HTML, then use html2pdf on that.
+    // OR: simpler approach -> just create a temporary div off-screen.
+
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '-9999px';
+    wrapper.innerHTML = invoiceHTML;
+    document.body.appendChild(wrapper);
+
+    // Target the invoice part
+    const content = wrapper.querySelector('.invoice-container');
+
+    // Remove buttons again just in case
+    wrapper.querySelector('.no-print')?.remove();
+
+    const opt = {
+      margin: [0, 0, 0, 0], // Reduced margin since CSS likely handles it
+      filename: `Invoice_${bill.invoiceNo}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Use a try-catch to handle if html2pdf is not loaded
+    try {
+      await html2pdf().set(opt).from(content).save();
+    } catch (err) {
+      console.error("PDF Download Error:", err);
+      // Fallback to print if library fails
+      this.generateInvoice(bill);
+    } finally {
+      document.body.removeChild(wrapper);
+    }
   }
 };
+

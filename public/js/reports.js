@@ -93,7 +93,7 @@ const ReportsManager = {
                 field: 'download',
                 label: 'Download',
                 render: (bill) => `
-          <button class="btn btn-outline" style="padding: 0.5rem 1rem;" onclick="(async () => { const b = await DB.getBillById('${bill.id}'); PDFGenerator.generateInvoice(b); })()">
+          <button class="btn btn-outline" style="padding: 0.5rem 1rem;" onclick="(async () => { const b = await DB.getBillById('${bill.id}'); PDFGenerator.downloadInvoice(b); })()">
             <i class="fas fa-file-pdf"></i> Download
           </button>
         `
