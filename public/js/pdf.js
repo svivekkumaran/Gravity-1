@@ -35,6 +35,25 @@ const PDFGenerator = {
     const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
     const invoiceTitle = isEstimate ? 'ESTIMATE' : 'TAX INVOICE';
 
+    // Calculate valid values for display, handling missing fields in old bills
+    const subtotal = bill.subtotal || 0;
+    const cgst = bill.cgst || 0;
+    const sgst = bill.sgst || 0;
+    const igst = bill.igst || 0;
+    const taxTotal = subtotal + cgst + sgst + igst;
+
+    let displayRoundOff, displayTotal;
+
+    if (bill.roundOff !== undefined && bill.roundOff !== null) {
+      displayRoundOff = bill.roundOff;
+      displayTotal = bill.total;
+    } else {
+      // Calculate for old bills
+      const roundedTotal = Math.round(taxTotal);
+      displayRoundOff = roundedTotal - taxTotal;
+      displayTotal = roundedTotal;
+    }
+
     const invoiceHTML = `
       <!DOCTYPE html>
       <html>
@@ -209,11 +228,11 @@ const PDFGenerator = {
             ` : ''}
             <tr>
               <td>Round Off:</td>
-              <td class="text-right">${formatCurrency(bill.roundOff || (Math.round(bill.subtotal + bill.cgst + bill.sgst + bill.igst) - (bill.subtotal + bill.cgst + bill.sgst + bill.igst)))}</td>
+              <td class="text-right">${formatCurrency(displayRoundOff)}</td>
             </tr>
             <tr class="total-row">
               <td>Grand Total:</td>
-              <td class="text-right">${formatCurrency(bill.total)}</td>
+              <td class="text-right">${formatCurrency(displayTotal)}</td>
             </tr>
             `}
           </table >
