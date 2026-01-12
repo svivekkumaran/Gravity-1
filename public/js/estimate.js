@@ -245,29 +245,33 @@ const EstimateManager = {
       subtotal += item.price * item.qty;
     });
 
-    // For Estimate, Total = Subtotal (no tax)
-    const total = subtotal;
+    const transportChargeInput = document.getElementById('transportCharge');
+    const transportCharge = transportChargeInput ? (parseFloat(transportChargeInput.value) || 0) : 0;
 
-    // Update summary display
-    const summaryHTML = `
-      <div class="summary-row">
-        <span>Round Off:</span>
-        <strong>${formatCurrency(Math.round(total) - total)}</strong>
-      </div>
-      <div class="summary-row total">
-        <span>Total:</span>
-        <strong>${formatCurrency(Math.round(total))}</strong>
-      </div>
-    `;
+    // For Estimate, Total = Subtotal + Transport (no tax)
+    const total = subtotal + transportCharge;
 
-    const summaryContainer = document.getElementById('billSummary');
-    if (summaryContainer) {
-      summaryContainer.innerHTML = summaryHTML;
+    // Update summary display (DOM directly to avoid re-rendering input and losing focus)
+    const displayTotalElement = document.getElementById('displayTotal');
+    if (displayTotalElement) {
+      displayTotalElement.textContent = formatCurrency(Math.round(total));
+    } else {
+      // Fallback for first render if needed, but usually static HTML handles structure
+      // We only render dynamic rows if not present? Actually renderCart calls this.
+      // Let's rely on static HTML structure from now on to keep input stable.
+      const summaryContainer = document.getElementById('billSummary');
+      if (summaryContainer) {
+        // Only update if total row missing? No, we need to update values.
+        // But re-rendering innerHTML kills input focus.
+        // We added input to HTML directly.
+        // So we just update the total text.
+      }
     }
 
     // Store for bill generation
     this.currentBill = {
       subtotal,
+      transportCharge,
       cgst: 0,
       sgst: 0,
       igst: 0,
@@ -321,6 +325,8 @@ const EstimateManager = {
       deliveryAddress: '', // No delivery address for estimate/simple
       customerGstin: '', // No GSTIN
       transportVehicleNumber: '',
+      transportCharge: this.currentBill.transportCharge,
+      billingNotes,
       billingNotes,
       date: billDate,
       placeOfSupply: 'Tamil Nadu (33)',
@@ -346,6 +352,7 @@ const EstimateManager = {
     if (document.getElementById('customerPhone')) document.getElementById('customerPhone').value = '';
     if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = '';
     if (document.getElementById('billingNotes')) document.getElementById('billingNotes').value = '';
+    if (document.getElementById('transportCharge')) document.getElementById('transportCharge').value = ''; // Clear transport charge
     if (document.getElementById('billDate')) document.getElementById('billDate').value = new Date().toISOString().split('T')[0];
   }
 };
