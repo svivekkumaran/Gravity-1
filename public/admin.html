@@ -351,6 +351,30 @@
                                 the blessing on invoices</p>
                         </div>
 
+                        <div class="glass-card mt-3">
+                            <h4 class="mb-3">Bank Account Details (optional)</h4>
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Account Holder Name</label>
+                                    <input type="text" class="form-input" id="accountHolderName">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bank Name</label>
+                                    <input type="text" class="form-input" id="bankName">
+                                </div>
+                            </div>
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Account Number</label>
+                                    <input type="text" class="form-input" id="accountNumber">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IFSC Code</label>
+                                    <input type="text" class="form-input" id="ifscCode">
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Save Settings</button>
                     </form>
                 </div>
@@ -537,6 +561,10 @@
             document.getElementById('companyPhone').value = settings.phone;
             document.getElementById('companyEmail').value = settings.email;
             document.getElementById('tamilBlessing').value = settings.tamilBlessing || '';
+            document.getElementById('accountHolderName').value = settings.accountHolderName || '';
+            document.getElementById('accountNumber').value = settings.accountNumber || '';
+            document.getElementById('ifscCode').value = settings.ifscCode || '';
+            document.getElementById('bankName').value = settings.bankName || '';
         }
 
         // Save settings
@@ -550,7 +578,13 @@
                 stateCode: document.getElementById('companyStateCode').value,
                 phone: document.getElementById('companyPhone').value,
                 email: document.getElementById('companyEmail').value,
-                tamilBlessing: document.getElementById('tamilBlessing').value
+                phone: document.getElementById('companyPhone').value,
+                email: document.getElementById('companyEmail').value,
+                tamilBlessing: document.getElementById('tamilBlessing').value,
+                accountHolderName: document.getElementById('accountHolderName').value,
+                accountNumber: document.getElementById('accountNumber').value,
+                ifscCode: document.getElementById('ifscCode').value,
+                bankName: document.getElementById('bankName').value
             };
 
             await DB.updateSettings(settings);

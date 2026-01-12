@@ -61,7 +61,11 @@ CREATE TABLE IF NOT EXISTS settings (
     phone TEXT NOT NULL,
     email TEXT NOT NULL,
     state_code TEXT NOT NULL,
-    tamil_blessing TEXT DEFAULT 'உ\nஸ்ரீ ராம ஜெயம்'
+    tamil_blessing TEXT DEFAULT 'உ\nஸ்ரீ ராம ஜெயம்',
+    account_holder_name TEXT DEFAULT '',
+    account_number TEXT DEFAULT '',
+    ifsc_code TEXT DEFAULT '',
+    bank_name TEXT DEFAULT ''
 );
 
 -- Create indexes for better performance
@@ -86,5 +90,5 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO settings (id, company_name, address, gstin, phone, email, state_code, tamil_blessing)
 VALUES (1, 'Retail Shop Pro', '123 Business Street, City, State - 123456', '22AAAAA0000A1Z5', '+91 9876543210', 'info@retailshop.com', '22', 'உ
-ஸ்ரீ ராம ஜெயம்')
+ஸ்ரீ ராம ஜெயம்', '', '', '', '')
 ON CONFLICT (id) DO NOTHING;

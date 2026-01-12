@@ -262,6 +262,31 @@ const PDFGenerator = {
             <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
           </div>
           
+          <!-- Bank Details Section (Configurable) -->
+          ${settings.accountHolderName || settings.accountNumber ? `
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; page-break-inside: avoid;">
+             <div style="font-size: 11px; font-weight: bold; color: #667eea; margin-bottom: 5px; text-transform: uppercase;">Bank Account Details</div>
+             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 15px; font-size: 11px; color: #333;">
+                ${settings.accountHolderName ? `
+                  <div style="font-weight: bold; color: #667eea;">NAME</div>
+                  <div style="font-weight: bold; color: #667eea;">: ${settings.accountHolderName}</div>
+                ` : ''}
+                ${settings.accountNumber ? `
+                  <div style="font-weight: bold; color: #667eea;">BANK A/C NO</div>
+                  <div style="font-weight: bold; color: #667eea;">: ${settings.accountNumber}</div>
+                ` : ''}
+                ${settings.ifscCode ? `
+                  <div style="font-weight: bold; color: #667eea;">IFSC CODE</div>
+                  <div style="font-weight: bold; color: #667eea;">: ${settings.ifscCode}</div>
+                ` : ''}
+                 ${settings.bankName ? `
+                  <div style="font-weight: bold; color: #667eea;">BANK NAME</div>
+                  <div style="font-weight: bold; color: #667eea;">: ${settings.bankName}</div>
+                ` : ''}
+             </div>
+          </div>
+          ` : ''}
+          
           <!-- Signature Section -->
           <div class="signature-section">
             <div class="signature-block">
