@@ -206,9 +206,23 @@ const PDFGenerator = {
           <!-- Summary -->
           <table class="summary-table">
             ${isEstimate ? `
+            <tr>
+              <td>Subtotal:</td>
+              <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
+            </tr>
+            ${bill.transportCharge > 0 ? `
+              <tr>
+                <td>Transport / Labour:</td>
+                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
+              </tr>
+            ` : ''}
+            <tr>
+              <td>Round Off:</td>
+              <td class="text-right">${formatCurrency(displayRoundOff)}</td>
+            </tr>
             <tr class="total-row">
               <td>Grand Total:</td>
-              <td class="text-right">${formatCurrency(bill.total)}</td>
+              <td class="text-right">${formatCurrency(displayTotal)}</td>
             </tr>
             ` : `
             <tr>
