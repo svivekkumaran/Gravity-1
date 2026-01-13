@@ -212,7 +212,7 @@ const PDFGenerator = {
             </tr>
             ${bill.transportCharge > 0 ? `
               <tr>
-                <td>Transport / Labour:</td>
+                <td>Transport / Labour Charges:</td>
                 <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
               </tr>
             ` : ''}
@@ -243,12 +243,7 @@ const PDFGenerator = {
                 <td class="text-right">${formatCurrency(igst)}</td>
               </tr>
             ` : ''}
-            ${bill.transportCharge > 0 ? `
-              <tr>
-                <td>Transport / Labour:</td>
-                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
-              </tr>
-            ` : ''}
+
             <tr>
               <td>Round Off:</td>
               <td class="text-right">${formatCurrency(displayRoundOff)}</td>
