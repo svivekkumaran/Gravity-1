@@ -33,9 +33,9 @@ const PDFGenerator = {
     const phone = settings.phone || 'Phone Number';
     const email = settings.email || 'Email Address';
     const tamilBlessing = settings.tamilBlessing || '';
-
+    // Removed Estimate in the PDF
     const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
-    const invoiceTitle = isEstimate ? 'ESTIMATE' : 'TAX INVOICE';
+    const invoiceTitle = isEstimate ? '' : 'TAX INVOICE';
 
     // Calculate valid values for display, handling missing fields in old bills
     // Use parseFloat to Ensure numbers, default to 0 if NaN
@@ -45,16 +45,20 @@ const PDFGenerator = {
     const igst = parseFloat(bill.igst) || 0;
     const taxTotal = subtotal + cgst + sgst + igst;
 
+    // Transport Charges
+    const transportCharge = parseFloat(bill.transportCharge) || 0;
+    const totalWithTransport = taxTotal + transportCharge;
+
     let displayRoundOff, displayTotal;
 
     // Strict check for valid roundOff
     if (bill.roundOff !== undefined && bill.roundOff !== null && !isNaN(parseFloat(bill.roundOff))) {
       displayRoundOff = parseFloat(bill.roundOff);
-      displayTotal = parseFloat(bill.total) || (taxTotal + displayRoundOff);
+      displayTotal = parseFloat(bill.total) || (totalWithTransport + displayRoundOff);
     } else {
       // Calculate for old bills or missing roundOff
-      const roundedTotal = Math.round(taxTotal);
-      displayRoundOff = roundedTotal - taxTotal;
+      const roundedTotal = Math.round(totalWithTransport);
+      displayRoundOff = roundedTotal - totalWithTransport;
       displayTotal = roundedTotal;
     }
 
