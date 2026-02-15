@@ -120,7 +120,7 @@ const PDFGenerator = {
         <style>
           /* Force print styles for PDF download */
           body { padding: 0 !important; }
-          .invoice-container { border: none !important; }
+          .invoice-container { border: none !important; width: 760px !important; max-width: none !important; }
           .no-print { display: none !important; }
           .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
           .signature-section { page-break-before: avoid !important; }
