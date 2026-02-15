@@ -1,10 +1,5 @@
 // ============================================
 // PDF GENERATION MODULE
-// Uses jsPDF library
-// ============================================
-
-// ============================================
-// PDF GENERATION MODULE
 // Uses jsPDF library (via html2pdf)
 // ============================================
 
@@ -343,9 +338,9 @@ const PDFGenerator = {
   },
 
   // Generate HTML for invoice (Print View - Full HTML Doc)
-  async generateInvoiceHTML(bill) {
+  async generateInvoiceHTML(bill, isForDownload = false) {
     const settings = await DB.getSettings();
-    const css = this.getInvoiceCSS(false);
+    const css = this.getInvoiceCSS(isForDownload);
     const content = this.getInvoiceContent(bill, settings);
 
     return `
@@ -380,48 +375,56 @@ const PDFGenerator = {
 
   // Download invoice as PDF
   async downloadInvoice(bill) {
-    const settings = await DB.getSettings();
-    const css = this.getInvoiceCSS(true);
-    const content = this.getInvoiceContent(bill, settings);
-
-    // Create a temporary container
-    const wrapper = document.createElement('div');
-    // Inject only style and pure content, no <html> or <body> tags
-    wrapper.innerHTML = css + content;
-
-    // Position it off-screen but part of the DOM
-    wrapper.style.position = 'absolute';
-    wrapper.style.left = '-9999px';
-    wrapper.style.top = '0';
-    document.body.appendChild(wrapper);
-
-    // Target the invoice part
-    const element = wrapper.querySelector('.invoice-container');
-
-    // Remove print buttons from the content to be downloaded
-    const noPrint = element.querySelector('.no-print');
-    if (noPrint) noPrint.remove();
-
-    const opt = {
-      margin: 5, // 5mm margin to match print styles
-      filename: `Invoice_${bill.invoiceNo}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // Use a try-catch to handle if html2pdf is not loaded
     try {
+      // Generate full HTML
+      const invoiceHTML = await this.generateInvoiceHTML(bill, true);
+
+      // Create an iframe to render the content in isolation
+      // This ensures a fresh CSS context and prevents "works only once" issues
+      const iframe = document.createElement('iframe');
+      iframe.style.visibility = 'hidden';
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-10000px';
+      iframe.style.top = '0';
+      iframe.style.width = '1000px'; // Give it enough width to render correctly before capture
+      iframe.style.height = '1000px';
+
+      document.body.appendChild(iframe);
+
+      // Write content
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(invoiceHTML);
+      iframeDoc.close();
+
+      // Wait for a moment to ensure rendering and painting is complete
+      // This fixes the "empty PDF" and "content mismatch" issues caused by race conditions
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Get the element from the iframe
+      const element = iframeDoc.querySelector('.invoice-container');
+
+      // Remove print buttons if they exist
+      const noPrint = element.querySelector('.no-print');
+      if (noPrint) noPrint.remove();
+
+      const opt = {
+        margin: 5, // 5mm margin
+        filename: `Invoice_${bill.invoiceNo}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
       await html2pdf().set(opt).from(element).save();
+
+      // Small delay to allow save to initiate before cleaning up
+      await new Promise(resolve => setTimeout(resolve, 100));
+      document.body.removeChild(iframe);
+
     } catch (err) {
       console.error("PDF Download Error:", err);
       alert("Failed to download PDF. Please try printing instead.");
-    } finally {
-      // Clean up the temporary element
-      if (document.body.contains(wrapper)) {
-        document.body.removeChild(wrapper);
-      }
     }
   }
 };
-
