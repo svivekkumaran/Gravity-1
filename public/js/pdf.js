@@ -363,9 +363,44 @@ const PDFGenerator = {
     };
   },
 
-  // Download invoice as PDF
-  // Opens the print window - user can save as PDF using browser's native print dialog
+  // Download invoice as PDF (automatic download via backend)
   async downloadInvoice(bill) {
-    await this.generateInvoice(bill);
+    try {
+      // Generate the invoice HTML
+      const html = await this.generateInvoiceHTML(bill);
+      const filename = `Invoice_${bill.invoiceNo}.pdf`;
+
+      // Send to backend for PDF generation
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html, filename }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error('PDF Download Error:', error);
+      alert('Failed to download PDF. Please try again or use the View button to print manually.');
+    }
   }
 };
