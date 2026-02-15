@@ -366,54 +366,42 @@ const PDFGenerator = {
   // Download invoice as PDF
   async downloadInvoice(bill) {
     try {
-      // Generate full HTML
+      // Open the print window (same as View button)
+      const printWindow = window.open('', '_blank');
       const invoiceHTML = await this.generateInvoiceHTML(bill);
 
-      // Create an iframe to render the content in isolation
-      // This ensures a fresh CSS context and prevents "works only once" issues
-      const iframe = document.createElement('iframe');
-      iframe.style.visibility = 'hidden';
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-10000px';
-      iframe.style.top = '0';
-      iframe.style.width = '1000px'; // Give it enough width to render correctly before capture
-      iframe.style.height = '1000px';
+      printWindow.document.write(invoiceHTML);
+      printWindow.document.close();
 
-      document.body.appendChild(iframe);
+      // Wait for the window to fully load and render
+      await new Promise((resolve) => {
+        printWindow.onload = () => {
+          // Additional delay to ensure fonts and layout are complete
+          setTimeout(resolve, 1000);
+        };
+      });
 
-      // Write content
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(invoiceHTML);
-      iframeDoc.close();
+      // Get the invoice container from the print window
+      const element = printWindow.document.querySelector('.invoice-container');
 
-      // Force @media print styles to apply by injecting a style override
-      // This is necessary because html2canvas doesn't automatically apply print media queries
-      const printStyleOverride = iframeDoc.createElement('style');
-      printStyleOverride.textContent = `
-        /* Force all @media print styles to apply */
-        body { padding: 0 !important; }
-        .invoice-container { border: none !important; }
-        .no-print { display: none !important; }
-        .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
-        .signature-section { page-break-before: avoid !important; }
-        table { page-break-inside: auto !important; }
-        thead { display: table-header-group !important; }
-        tr { page-break-inside: avoid !important; }
-        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-      `;
-      iframeDoc.head.appendChild(printStyleOverride);
+      if (!element) {
+        throw new Error('Invoice container not found in print window');
+      }
 
-      // Wait for a moment to ensure rendering and painting is complete
-      // This fixes the "empty PDF" and "content mismatch" issues caused by race conditions
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Clone the element to avoid affecting the print window
+      const clonedElement = element.cloneNode(true);
 
-      // Get the element from the iframe
-      const element = iframeDoc.querySelector('.invoice-container');
-
-      // Remove print buttons if they exist
-      const noPrint = element.querySelector('.no-print');
+      // Remove print buttons from the cloned element
+      const noPrint = clonedElement.querySelector('.no-print');
       if (noPrint) noPrint.remove();
+
+      // Create a temporary container in the main window for html2pdf
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-10000px';
+      tempContainer.style.top = '0';
+      document.body.appendChild(tempContainer);
+      tempContainer.appendChild(clonedElement);
 
       const opt = {
         margin: 5, // 5mm margin
@@ -423,15 +411,16 @@ const PDFGenerator = {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      await html2pdf().set(opt).from(element).save();
+      // Generate PDF
+      await html2pdf().set(opt).from(clonedElement).save();
 
-      // Small delay to allow save to initiate before cleaning up
-      await new Promise(resolve => setTimeout(resolve, 100));
-      document.body.removeChild(iframe);
+      // Clean up
+      document.body.removeChild(tempContainer);
+      printWindow.close();
 
     } catch (err) {
       console.error("PDF Download Error:", err);
-      alert("Failed to download PDF. Please try printing instead.");
+      alert("Failed to download PDF. Error: " + err.message);
     }
   }
 };
