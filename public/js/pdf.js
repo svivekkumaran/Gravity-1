@@ -364,63 +364,8 @@ const PDFGenerator = {
   },
 
   // Download invoice as PDF
+  // Opens the print window - user can save as PDF using browser's native print dialog
   async downloadInvoice(bill) {
-    try {
-      // Open the print window (same as View button)
-      const printWindow = window.open('', '_blank');
-      const invoiceHTML = await this.generateInvoiceHTML(bill);
-
-      printWindow.document.write(invoiceHTML);
-      printWindow.document.close();
-
-      // Wait for the window to fully load and render
-      await new Promise((resolve) => {
-        printWindow.onload = () => {
-          // Additional delay to ensure fonts and layout are complete
-          setTimeout(resolve, 1000);
-        };
-      });
-
-      // Get the invoice container from the print window
-      const element = printWindow.document.querySelector('.invoice-container');
-
-      if (!element) {
-        throw new Error('Invoice container not found in print window');
-      }
-
-      // Clone the element to avoid affecting the print window
-      const clonedElement = element.cloneNode(true);
-
-      // Remove print buttons from the cloned element
-      const noPrint = clonedElement.querySelector('.no-print');
-      if (noPrint) noPrint.remove();
-
-      // Create a temporary container in the main window for html2pdf
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-10000px';
-      tempContainer.style.top = '0';
-      document.body.appendChild(tempContainer);
-      tempContainer.appendChild(clonedElement);
-
-      const opt = {
-        margin: 5, // 5mm margin
-        filename: `Invoice_${bill.invoiceNo}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      // Generate PDF
-      await html2pdf().set(opt).from(clonedElement).save();
-
-      // Clean up
-      document.body.removeChild(tempContainer);
-      printWindow.close();
-
-    } catch (err) {
-      console.error("PDF Download Error:", err);
-      alert("Failed to download PDF. Error: " + err.message);
-    }
+    await this.generateInvoice(bill);
   }
 };
