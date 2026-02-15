@@ -22,32 +22,94 @@ const PDFGenerator = {
     return remainingLines ? `${firstLine}<br>${remainingLines}` : firstLine;
   },
 
-  // Generate HTML for invoice
-  async generateInvoiceHTML(bill, isForDownload = false) {
-    const settings = await DB.getSettings();
+  // Get CSS Styles
+  getInvoiceCSS(isForDownload = false) {
+    return `
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body { font-family: 'Arial', sans-serif; padding: 20px; color: #333; background: white; }
+        .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #333; padding: 20px; }
+        .invoice-header { border-bottom: 3px solid #333; padding-bottom: 12px; margin-bottom: 12px; position: relative; }
+        .tamil-blessing { text-align: center; font-size: 10px; font-weight: normal; color: #000; margin-bottom: 8px; line-height: 1.4; white-space: pre-line; }
+        .company-name { text-align: center; font-size: 28px; font-weight: bold; color: #667eea; margin-bottom: 10px; }
+        .company-details { text-align: center; font-size: 12px; line-height: 1.6; color: #666; }
+        .invoice-title { font-size: 20px; font-weight: bold; margin: 12px 0; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .invoice-number { font-size: 16px; color: #667eea; font-weight: bold; }
+        .invoice-info { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .info-block { flex: 1; }
+        .info-block h3 { font-size: 14px; margin-bottom: 10px; color: #667eea; }
+        .info-block p { font-size: 12px; line-height: 1.6; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: auto; }
+        thead { display: table-header-group; }
+        tbody { display: table-row-group; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        th { background: #667eea; color: white; padding: 8px; text-align: left; font-size: 11px; font-weight: bold; }
+        td { padding: 6px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .summary-table { margin-left: auto; width: 300px; margin-top: 10px; page-break-inside: avoid; }
+        .summary-table td { border: none; padding: 5px 8px; }
+        .summary-table .total-row { background: #667eea; color: white; font-weight: bold; font-size: 14px; }
+        .footer { margin-top: 8px; padding-top: 8px; border-top: 2px solid #ddd; text-align: center; font-size: 10px; color: #666; page-break-inside: avoid; }
+        .signature-section { margin-top: 15px; display: flex; justify-content: space-between; page-break-inside: avoid; page-break-before: avoid; }
+        .signature-block { text-align: center; }
+        .signature-line { width: 200px; border-top: 1px solid #333; margin-top: 35px; padding-top: 5px; font-size: 11px; }
+        @page { margin: 0.5cm; size: A4; }
+        @media print {
+          body { padding: 0; }
+          .invoice-container { border: none; }
+          .no-print { display: none; }
+          .summary-table, .signature-section, .footer { page-break-inside: avoid; }
+          .signature-section { page-break-before: avoid; }
+          table { page-break-inside: auto; }
+          thead { display: table-header-group; }
+          tr { page-break-inside: avoid; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        }
+        ${isForDownload ? `
+          /* Force print styles for PDF download */
+          body { padding: 0 !important; }
+          .invoice-container { border: none !important; width: 760px !important; max-width: none !important; }
+          .no-print { display: none !important; }
+          .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
+          .signature-section { page-break-before: avoid !important; }
+          table { page-break-inside: auto !important; }
+          thead { display: table-header-group !important; }
+          tr { page-break-inside: avoid !important; }
+        ` : ''}
+      </style>
+    `;
+  },
 
-    // Provide fallback values to prevent "undefined" in PDF
+  // Get Invoice HTML Content
+  getInvoiceContent(bill, settings) {
+    // Provide fallback values
     const companyName = settings.companyName || 'Your Company Name';
     const address = settings.address || 'Company Address';
     const gstin = settings.gstin || 'GSTIN Number';
     const phone = settings.phone || 'Phone Number';
     const email = settings.email || 'Email Address';
     const tamilBlessing = settings.tamilBlessing || '';
+
     // Removed Estimate in the PDF
     const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
     const invoiceTitle = isEstimate ? '' : 'TAX INVOICE';
 
-    // Calculate valid values for display, handling missing fields in old bills
-    // Use parseFloat to Ensure numbers, default to 0 if NaN
+    // Calculate valid values for display
     const subtotal = parseFloat(bill.subtotal) || 0;
     const cgst = parseFloat(bill.cgst) || 0;
     const sgst = parseFloat(bill.sgst) || 0;
     const igst = parseFloat(bill.igst) || 0;
-    const taxTotal = subtotal + cgst + sgst + igst;
+    const taxTotal = subtotal + cgst + sgst + igst; // taxTotal not really used directly in display logic below but good for verification if needed
 
     // Transport Charges
     const transportCharge = parseFloat(bill.transportCharge) || 0;
-    const totalWithTransport = taxTotal + transportCharge;
+    const totalWithTransport = (subtotal + cgst + sgst + igst) + transportCharge;
 
     let displayRoundOff, displayTotal;
 
@@ -63,135 +125,67 @@ const PDFGenerator = {
     }
 
     return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>${invoiceTitle} ${bill.invoiceNo}</title>
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body { font-family: 'Arial', sans-serif; padding: 20px; color: #333; background: white; }
-          .invoice-container { max-width: 800px; margin: 0 auto; border: 2px solid #333; padding: 20px; }
-          .invoice-header { border-bottom: 3px solid #333; padding-bottom: 12px; margin-bottom: 12px; position: relative; }
-          .tamil-blessing { text-align: center; font-size: 10px; font-weight: normal; color: #000; margin-bottom: 8px; line-height: 1.4; white-space: pre-line; }
-          .company-name { text-align: center; font-size: 28px; font-weight: bold; color: #667eea; margin-bottom: 10px; }
-          .company-details { text-align: center; font-size: 12px; line-height: 1.6; color: #666; }
-          .invoice-title { font-size: 20px; font-weight: bold; margin: 12px 0; color: #333; display: flex; justify-content: space-between; align-items: center; }
-          .invoice-number { font-size: 16px; color: #667eea; font-weight: bold; }
-          .invoice-info { display: flex; justify-content: space-between; margin-bottom: 15px; }
-          .info-block { flex: 1; }
-          .info-block h3 { font-size: 14px; margin-bottom: 10px; color: #667eea; }
-          .info-block p { font-size: 12px; line-height: 1.6; color: #666; }
-          table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: auto; }
-          thead { display: table-header-group; }
-          tbody { display: table-row-group; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
-          th { background: #667eea; color: white; padding: 8px; text-align: left; font-size: 11px; font-weight: bold; }
-          td { padding: 6px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
-          tr:nth-child(even) { background: #f9f9f9; }
-          .text-right { text-align: right; }
-          .text-center { text-align: center; }
-          .summary-table { margin-left: auto; width: 300px; margin-top: 10px; page-break-inside: avoid; }
-          .summary-table td { border: none; padding: 5px 8px; }
-          .summary-table .total-row { background: #667eea; color: white; font-weight: bold; font-size: 14px; }
-          .footer { margin-top: 8px; padding-top: 8px; border-top: 2px solid #ddd; text-align: center; font-size: 10px; color: #666; page-break-inside: avoid; }
-          .signature-section { margin-top: 15px; display: flex; justify-content: space-between; page-break-inside: avoid; page-break-before: avoid; }
-          .signature-block { text-align: center; }
-          .signature-line { width: 200px; border-top: 1px solid #333; margin-top: 35px; padding-top: 5px; font-size: 11px; }
-          @page { margin: 0.5cm; size: A4; }
-          @media print {
-            body { padding: 0; }
-            .invoice-container { border: none; }
-            .no-print { display: none; }
-            .summary-table, .signature-section, .footer { page-break-inside: avoid; }
-            .signature-section { page-break-before: avoid; }
-            table { page-break-inside: auto; }
-            thead { display: table-header-group; }
-            tr { page-break-inside: avoid; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-          }
-        </style>
-
-        ${isForDownload ? `
-        <style>
-          /* Force print styles for PDF download */
-          body { padding: 0 !important; }
-          .invoice-container { border: none !important; width: 760px !important; max-width: none !important; }
-          .no-print { display: none !important; }
-          .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
-          .signature-section { page-break-before: avoid !important; }
-          table { page-break-inside: auto !important; }
-          thead { display: table-header-group !important; }
-          tr { page-break-inside: avoid !important; }
-        </style>
-        ` : ''}
-      </head>
-      <body>
-        <div class="invoice-container" id="invoice">
-          <!-- Header -->
-          <div class="invoice-header">
-            ${tamilBlessing ? `<div class="tamil-blessing">${this.formatTamilBlessing(tamilBlessing)}</div>` : ''}
-            <div class="company-name">${companyName}</div>
-            <div class="company-details">
-              ${address}<br>
-              ${!isEstimate ? `GSTIN: ${gstin} | ` : ''}Phone: ${phone}<br>
-              ${!isEstimate ? `Email: ${email}` : ''}
-            </div>
+      <div class="invoice-container" id="invoice">
+        <!-- Header -->
+        <div class="invoice-header">
+          ${tamilBlessing ? `<div class="tamil-blessing">${this.formatTamilBlessing(tamilBlessing)}</div>` : ''}
+          <div class="company-name">${companyName}</div>
+          <div class="company-details">
+            ${address}<br>
+            ${!isEstimate ? `GSTIN: ${gstin} | ` : ''}Phone: ${phone}<br>
+            ${!isEstimate ? `Email: ${email}` : ''}
           </div>
-          
-          <!-- Invoice Title -->
-          <div class="invoice-title">
-            <span>${invoiceTitle}</span>
-            <span class="invoice-number">No: ${bill.invoiceNo}</span>
+        </div>
+        
+        <!-- Invoice Title -->
+        <div class="invoice-title">
+          <span>${invoiceTitle}</span>
+          <span class="invoice-number">No: ${bill.invoiceNo}</span>
+        </div>
+        
+        <!-- Invoice Info -->
+        <div class="invoice-info">
+          <div class="info-block">
+            <h3>Bill To:</h3>
+            <p>
+              <strong>${bill.customerName}</strong><br>
+              ${bill.customerAddress ? bill.customerAddress.replace(/\n/g, '<br>') + '<br>' : ''}
+              ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
+              ${!isEstimate && bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
+            </p>
           </div>
-          
-          <!-- Invoice Info -->
-          <div class="invoice-info">
-            <div class="info-block">
-              <h3>Bill To:</h3>
-              <p>
-                <strong>${bill.customerName}</strong><br>
-                ${bill.customerAddress ? bill.customerAddress.replace(/\n/g, '<br>') + '<br>' : ''}
-                ${bill.customerPhone ? 'Phone: ' + bill.customerPhone + '<br>' : ''}
-                ${!isEstimate && bill.customerGstin ? 'GSTIN: ' + bill.customerGstin : ''}
-              </p>
-            </div>
-            ${!isEstimate || bill.deliveryAddress ? `
-            <div class="info-block">
-              <h3>Delivery To:</h3>
-              <p>${(bill.deliveryAddress || bill.customerAddress || 'Same as Bill To Address').replace(/\n/g, '<br>')}</p>
-            </div> ` : '<div class="info-block"></div>'}
-            <div class="info-block" style="text-align: right;">
-              <p>
-                <strong>Date:</strong> ${formatDate(bill.date)}<br>
-                <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
-                <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
-              </p>
-            </div>
+          ${!isEstimate || bill.deliveryAddress ? `
+          <div class="info-block">
+            <h3>Delivery To:</h3>
+            <p>${(bill.deliveryAddress || bill.customerAddress || 'Same as Bill To Address').replace(/\n/g, '<br>')}</p>
+          </div> ` : '<div class="info-block"></div>'}
+          <div class="info-block" style="text-align: right;">
+            <p>
+              <strong>Date:</strong> ${formatDate(bill.date)}<br>
+              <strong>Place of Supply:</strong> ${bill.placeOfSupply || 'Tamil Nadu (33)'}<br>
+              <strong>Billed By:</strong> ${bill.billedBy || 'N/A'}
+            </p>
           </div>
-          
-          <!-- Items Table -->
-          <table>
-            <thead>
-              <tr>
-                <th>S.No</th>
-                <th>Product Name</th>
-                ${!isEstimate ? '<th>HSN</th>' : ''}
-                <th class="text-center">Qty</th>
-                <th class="text-right">Price</th>
-                ${!isEstimate ? `
-                <th class="text-center">GST%</th>
-                <th class="text-right">GST Amt</th>
-                ` : ''}
-                <th class="text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${bill.items.map((item, index) => {
+        </div>
+        
+        <!-- Items Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Product Name</th>
+              ${!isEstimate ? '<th>HSN</th>' : ''}
+              <th class="text-center">Qty</th>
+              <th class="text-right">Price</th>
+              ${!isEstimate ? `
+              <th class="text-center">GST%</th>
+              <th class="text-right">GST Amt</th>
+              ` : ''}
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bill.items.map((item, index) => {
       const itemSubtotal = item.price * item.qty;
       const gst = calculateGST(itemSubtotal, item.gstRate);
       const itemTotal = itemSubtotal + (isEstimate ? 0 : gst.total);
@@ -204,152 +198,169 @@ const PDFGenerator = {
       else unitDisplay = unitDisplay.charAt(0).toUpperCase() + unitDisplay.slice(1);
 
       return `
-                  <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.name}</td>
-                    ${!isEstimate ? `<td>${item.hsnCode || 'N/A'}</td>` : ''}
-                    <td class="text-center">${item.qty} ${unitDisplay}</td>
-                    <td class="text-right">${formatCurrency(item.price)}</td>
-                    ${!isEstimate ? `
-                    <td class="text-center">${item.gstRate}%</td>
-                    <td class="text-right">${formatCurrency(gst.total)}</td>
-                    ` : ''}
-                    <td class="text-right"><strong>${formatCurrency(itemTotal)}</strong></td>
-                  </tr>
-                `;
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${item.name}</td>
+                  ${!isEstimate ? `<td>${item.hsnCode || 'N/A'}</td>` : ''}
+                  <td class="text-center">${item.qty} ${unitDisplay}</td>
+                  <td class="text-right">${formatCurrency(item.price)}</td>
+                  ${!isEstimate ? `
+                  <td class="text-center">${item.gstRate}%</td>
+                  <td class="text-right">${formatCurrency(gst.total)}</td>
+                  ` : ''}
+                  <td class="text-right"><strong>${formatCurrency(itemTotal)}</strong></td>
+                </tr>
+              `;
     }).join('')}
-            </tbody>
-          </table>
-          
-          <!-- Summary -->
-          <table class="summary-table">
-            ${isEstimate ? `
+          </tbody>
+        </table>
+        
+        <!-- Summary -->
+        <table class="summary-table">
+          ${isEstimate ? `
+          <tr>
+            <td>Subtotal:</td>
+            <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
+          </tr>
+          ${bill.transportCharge > 0 ? `
             <tr>
-              <td>Subtotal:</td>
-              <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
+              <td>Transport / Labour Charges:</td>
+              <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
             </tr>
-            ${bill.transportCharge > 0 ? `
-              <tr>
-                <td>Transport / Labour Charges:</td>
-                <td class="text-right">${formatCurrency(bill.transportCharge)}</td>
-              </tr>
-            ` : ''}
-            <tr>
-              <td>Round Off:</td>
-              <td class="text-right">${formatCurrency(displayRoundOff)}</td>
-            </tr>
-            <tr class="total-row">
-              <td>Grand Total:</td>
-              <td class="text-right">${formatCurrency(displayTotal)}</td>
-            </tr>
-            ` : `
-            <tr>
-              <td>Subtotal:</td>
-              <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
-            </tr>
-            <tr>
-              <td>CGST:</td>
-              <td class="text-right">${formatCurrency(cgst)}</td>
-            </tr>
-            <tr>
-              <td>SGST:</td>
-              <td class="text-right">${formatCurrency(sgst)}</td>
-            </tr>
-            ${igst > 0 ? `
-              <tr>
-                <td>IGST:</td>
-                <td class="text-right">${formatCurrency(igst)}</td>
-              </tr>
-            ` : ''}
-
-            <tr>
-              <td>Round Off:</td>
-              <td class="text-right">${formatCurrency(displayRoundOff)}</td>
-            </tr>
-            <tr class="total-row">
-              <td>Grand Total:</td>
-              <td class="text-right">${formatCurrency(displayTotal)}</td>
-            </tr>
-            `}
-          </table >
-          
-          <!-- Amount in Words -->
-  ${bill.amountInWords ? `
-          <div style="margin-top: 10px; padding: 6px; background: #f9f9f9; border-left: 3px solid #667eea; font-size: 11px;">
-            <strong>Amount in Words:</strong> ${bill.amountInWords}
-          </div>
-          ` : ''
-      }
-          
-          <!-- Transport Vehicle (if exists) -->
-  ${bill.transportVehicleNumber ? `
-          <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
-            <p style="margin: 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>
-          </div>
-          ` : ''
-      }
-          
-          <!-- Additional Notes Section (simple text box) -->
-          <div style="margin-top: 8px; padding: 8px; min-height: 30px; page-break-inside: avoid;">
-            <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
-            <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
-          </div>
-          
-          <!-- Bank Details Section (Configurable) -->
-          ${settings.accountHolderName || settings.accountNumber ? `
-          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; page-break-inside: avoid;">
-             <div style="font-size: 11px; font-weight: bold; color: #667eea; margin-bottom: 5px; text-transform: uppercase;">Bank Account Details</div>
-             <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 15px; font-size: 11px; color: #333;">
-                ${settings.accountHolderName ? `
-                  <div style="font-weight: bold; color: #667eea;">NAME</div>
-                  <div style="font-weight: bold; color: #667eea;">: ${settings.accountHolderName}</div>
-                ` : ''}
-                ${settings.accountNumber ? `
-                  <div style="font-weight: bold; color: #667eea;">BANK A/C NO</div>
-                  <div style="font-weight: bold; color: #667eea;">: ${settings.accountNumber}</div>
-                ` : ''}
-                ${settings.ifscCode ? `
-                  <div style="font-weight: bold; color: #667eea;">IFSC CODE</div>
-                  <div style="font-weight: bold; color: #667eea;">: ${settings.ifscCode}</div>
-                ` : ''}
-                 ${settings.bankName ? `
-                  <div style="font-weight: bold; color: #667eea;">BANK NAME</div>
-                  <div style="font-weight: bold; color: #667eea;">: ${settings.bankName}</div>
-                ` : ''}
-             </div>
-          </div>
           ` : ''}
-          
-          <!-- Signature Section -->
-          <div class="signature-section">
-            <div class="signature-block">
-              <div class="signature-line">Customer Signature</div>
-            </div>
-            <div class="signature-block">
-              <div class="signature-line">Authorized Signatory</div>
-            </div>
+          <tr>
+            <td>Round Off:</td>
+            <td class="text-right">${formatCurrency(displayRoundOff)}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Grand Total:</td>
+            <td class="text-right">${formatCurrency(displayTotal)}</td>
+          </tr>
+          ` : `
+          <tr>
+            <td>Subtotal:</td>
+            <td class="text-right"><strong>${formatCurrency(subtotal)}</strong></td>
+          </tr>
+          <tr>
+            <td>CGST:</td>
+            <td class="text-right">${formatCurrency(cgst)}</td>
+          </tr>
+          <tr>
+            <td>SGST:</td>
+            <td class="text-right">${formatCurrency(sgst)}</td>
+          </tr>
+          ${igst > 0 ? `
+            <tr>
+              <td>IGST:</td>
+              <td class="text-right">${formatCurrency(igst)}</td>
+            </tr>
+          ` : ''}
+
+          <tr>
+            <td>Round Off:</td>
+            <td class="text-right">${formatCurrency(displayRoundOff)}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Grand Total:</td>
+            <td class="text-right">${formatCurrency(displayTotal)}</td>
+          </tr>
+          `}
+        </table >
+        
+        <!-- Amount in Words -->
+        ${bill.amountInWords ? `
+        <div style="margin-top: 10px; padding: 6px; background: #f9f9f9; border-left: 3px solid #667eea; font-size: 11px;">
+          <strong>Amount in Words:</strong> ${bill.amountInWords}
+        </div>
+        ` : ''}
+        
+        <!-- Transport Vehicle (if exists) -->
+        ${bill.transportVehicleNumber ? `
+        <div style="margin-top: 8px; padding: 6px; background: #f9f9f9; border: 1px solid #ddd;">
+          <p style="margin: 0; font-size: 10px;"><strong>Transport Vehicle:</strong> ${bill.transportVehicleNumber}</p>
+        </div>
+        ` : ''}
+        
+        <!-- Additional Notes Section (simple text box) -->
+        <div style="margin-top: 8px; padding: 8px; min-height: 30px; page-break-inside: avoid;">
+          <strong style="font-size: 10px; color: #333;">Additional Notes:</strong>
+          <span style="font-size: 10px; margin-left: 5px;">${bill.billingNotes || ''}</span>
+        </div>
+        
+        <!-- Bank Details Section (Configurable) -->
+        ${settings.accountHolderName || settings.accountNumber ? `
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; page-break-inside: avoid;">
+           <div style="font-size: 11px; font-weight: bold; color: #667eea; margin-bottom: 5px; text-transform: uppercase;">Bank Account Details</div>
+           <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 15px; font-size: 11px; color: #333;">
+              ${settings.accountHolderName ? `
+                <div style="font-weight: bold; color: #667eea;">NAME</div>
+                <div style="font-weight: bold; color: #667eea;">: ${settings.accountHolderName}</div>
+              ` : ''}
+              ${settings.accountNumber ? `
+                <div style="font-weight: bold; color: #667eea;">BANK A/C NO</div>
+                <div style="font-weight: bold; color: #667eea;">: ${settings.accountNumber}</div>
+              ` : ''}
+              ${settings.ifscCode ? `
+                <div style="font-weight: bold; color: #667eea;">IFSC CODE</div>
+                <div style="font-weight: bold; color: #667eea;">: ${settings.ifscCode}</div>
+              ` : ''}
+               ${settings.bankName ? `
+                <div style="font-weight: bold; color: #667eea;">BANK NAME</div>
+                <div style="font-weight: bold; color: #667eea;">: ${settings.bankName}</div>
+              ` : ''}
+           </div>
+        </div>
+        ` : ''}
+        
+        <!-- Signature Section -->
+        <div class="signature-section">
+          <div class="signature-block">
+            <div class="signature-line">Customer Signature</div>
           </div>
-          
-          <!-- Footer with Terms & Conditions -->
-          <div class="footer">
-            <p style="margin: 0 0 5px 0;"><strong>Thank you for your business!</strong></p>
-            <p style="margin: 0 0 5px 0;">This is a computer-generated invoice and does not require a physical signature.</p>
-            <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
+          <div class="signature-block">
+            <div class="signature-line">Authorized Signatory</div>
           </div>
-          
-          <!-- Print Button (Only visible in Print Window) -->
-  <div style="text-align: center; margin-top: 30px;" class="no-print">
-    <button onclick="window.print()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px;">
-      Print Invoice
-    </button>
-    <button onclick="window.close()" style="padding: 12px 30px; background: #666; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
-      Close
-    </button>
-  </div>
-        </div >
-      </body >
-      </html >
-  `;
+        </div>
+        
+        <!-- Footer with Terms & Conditions -->
+        <div class="footer">
+          <p style="margin: 0 0 5px 0;"><strong>Thank you for your business!</strong></p>
+          <p style="margin: 0 0 5px 0;">This is a computer-generated invoice and does not require a physical signature.</p>
+          <p style="margin: 0; font-size: 9px; color: #888;"><strong>Terms & Conditions:</strong> Goods once sold cannot be returned</p>
+        </div>
+        
+        <!-- Print Button (Only visible in Print Window) -->
+        <div style="text-align: center; margin-top: 30px;" class="no-print">
+          <button onclick="window.print()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px;">
+            Print Invoice
+          </button>
+          <button onclick="window.close()" style="padding: 12px 30px; background: #666; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
+            Close
+          </button>
+        </div>
+      </div >
+    `;
+  },
+
+  // Generate HTML for invoice (Print View - Full HTML Doc)
+  async generateInvoiceHTML(bill) {
+    const settings = await DB.getSettings();
+    const css = this.getInvoiceCSS(false);
+    const content = this.getInvoiceContent(bill, settings);
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Invoice ${bill.invoiceNo}</title>
+        ${css}
+      </head>
+      <body>
+        ${content}
+      </body>
+      </html>
+    `;
   },
 
   // Generate and open invoice (Print view)
@@ -369,39 +380,27 @@ const PDFGenerator = {
 
   // Download invoice as PDF
   async downloadInvoice(bill) {
-    // Generate HTML
-    const invoiceHTML = await this.generateInvoiceHTML(bill, true);
+    const settings = await DB.getSettings();
+    const css = this.getInvoiceCSS(true);
+    const content = this.getInvoiceContent(bill, settings);
 
     // Create a temporary container
-    const container = document.createElement('div');
-    container.innerHTML = invoiceHTML;
-
-    // Remove the print buttons before converting
-    const noPrint = container.querySelector('.no-print');
-    if (noPrint) noPrint.remove();
-
-    // The actual invoice content
-    const element = container.querySelector('.invoice-container');
-
-    // We need to temporarily append to body to ensure styles render correctly for html2pdf
-    // But since we are extracting inline styles, we can just pass the element if it has all styles.
-    // However, html2pdf works best with live DOM elements.
-
-    // Better approach for html2pdf with custom styles:
-    // Create an iframe to render the HTML, then use html2pdf on that.
-    // OR: simpler approach -> just create a temporary div off-screen.
-
     const wrapper = document.createElement('div');
+    // Inject only style and pure content, no <html> or <body> tags
+    wrapper.innerHTML = css + content;
+
+    // Position it off-screen but part of the DOM
     wrapper.style.position = 'absolute';
     wrapper.style.left = '-9999px';
-    wrapper.innerHTML = invoiceHTML;
+    wrapper.style.top = '0';
     document.body.appendChild(wrapper);
 
     // Target the invoice part
-    const content = wrapper.querySelector('.invoice-container');
+    const element = wrapper.querySelector('.invoice-container');
 
-    // Remove buttons again just in case
-    wrapper.querySelector('.no-print')?.remove();
+    // Remove print buttons from the content to be downloaded
+    const noPrint = element.querySelector('.no-print');
+    if (noPrint) noPrint.remove();
 
     const opt = {
       margin: 5, // 5mm margin to match print styles
@@ -413,13 +412,15 @@ const PDFGenerator = {
 
     // Use a try-catch to handle if html2pdf is not loaded
     try {
-      await html2pdf().set(opt).from(content).save();
+      await html2pdf().set(opt).from(element).save();
     } catch (err) {
       console.error("PDF Download Error:", err);
-      // Fallback to print if library fails
-      this.generateInvoice(bill);
+      alert("Failed to download PDF. Please try printing instead.");
     } finally {
-      document.body.removeChild(wrapper);
+      // Clean up the temporary element
+      if (document.body.contains(wrapper)) {
+        document.body.removeChild(wrapper);
+      }
     }
   }
 };
