@@ -18,7 +18,7 @@ const PDFGenerator = {
   },
 
   // Get CSS Styles
-  getInvoiceCSS(isForDownload = false) {
+  getInvoiceCSS() {
     return `
       <style>
         * {
@@ -66,17 +66,7 @@ const PDFGenerator = {
           tr { page-break-inside: avoid; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         }
-        ${isForDownload ? `
-          /* Force print styles for PDF download */
-          body { padding: 0 !important; }
-          .invoice-container { border: none !important; width: 760px !important; max-width: none !important; }
-          .no-print { display: none !important; }
-          .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
-          .signature-section { page-break-before: avoid !important; }
-          table { page-break-inside: auto !important; }
-          thead { display: table-header-group !important; }
-          tr { page-break-inside: avoid !important; }
-        ` : ''}
+
       </style>
     `;
   },
@@ -338,9 +328,9 @@ const PDFGenerator = {
   },
 
   // Generate HTML for invoice (Print View - Full HTML Doc)
-  async generateInvoiceHTML(bill, isForDownload = false) {
+  async generateInvoiceHTML(bill) {
     const settings = await DB.getSettings();
-    const css = this.getInvoiceCSS(isForDownload);
+    const css = this.getInvoiceCSS();
     const content = this.getInvoiceContent(bill, settings);
 
     return `
@@ -377,7 +367,7 @@ const PDFGenerator = {
   async downloadInvoice(bill) {
     try {
       // Generate full HTML
-      const invoiceHTML = await this.generateInvoiceHTML(bill, true);
+      const invoiceHTML = await this.generateInvoiceHTML(bill);
 
       // Create an iframe to render the content in isolation
       // This ensures a fresh CSS context and prevents "works only once" issues
