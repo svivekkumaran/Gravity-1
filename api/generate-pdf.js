@@ -1,12 +1,8 @@
-const chrome = require('chrome-aws-lambda');
-
 module.exports = async (req, res) => {
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
-
-    let browser = null;
 
     try {
         const { html, filename } = req.body;
@@ -15,41 +11,45 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'HTML content is required' });
         }
 
-        // Launch headless Chrome using chrome-aws-lambda
-        browser = await chrome.puppeteer.launch({
-            args: chrome.args,
-            defaultViewport: chrome.defaultViewport,
-            executablePath: await chrome.executablePath,
-            headless: chrome.headless,
-            ignoreHTTPSErrors: true,
-        });
+        // Get API key from environment variable
+        const apiKey = process.env.PDFSHIFT_API_KEY;
 
-        const page = await browser.newPage();
+        if (!apiKey) {
+            console.error('PDFSHIFT_API_KEY not configured');
+            return res.status(500).json({
+                error: 'PDF service not configured',
+                details: 'Please add PDFSHIFT_API_KEY to environment variables'
+            });
+        }
 
-        // Set the HTML content
-        await page.setContent(html, {
-            waitUntil: ['networkidle0', 'load'],
-            timeout: 30000,
-        });
-
-        // Wait a bit for fonts to load
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Generate PDF with print CSS
-        const pdf = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            preferCSSPageSize: false,
-            margin: {
-                top: '5mm',
-                right: '5mm',
-                bottom: '5mm',
-                left: '5mm',
+        // Call PDFShift API
+        const response = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${Buffer.from(`api:${apiKey}`).toString('base64')}`
             },
+            body: JSON.stringify({
+                source: html,
+                format: 'A4',
+                margin: '5mm',
+                print_background: true,
+                use_print: true
+            })
         });
 
-        await browser.close();
-        browser = null;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('PDFShift API Error:', errorText);
+            return res.status(response.status).json({
+                error: 'Failed to generate PDF',
+                details: errorText
+            });
+        }
+
+        // Get PDF binary
+        const pdfBuffer = await response.arrayBuffer();
+        const pdf = Buffer.from(pdfBuffer);
 
         // Set headers for PDF download
         res.setHeader('Content-Type', 'application/pdf');
@@ -59,16 +59,9 @@ module.exports = async (req, res) => {
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
-
-        // Make sure browser is closed
-        if (browser) {
-            await browser.close();
-        }
-
         res.status(500).json({
             error: 'Failed to generate PDF',
-            details: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            details: error.message
         });
     }
 };
