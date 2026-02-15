@@ -387,6 +387,23 @@ const PDFGenerator = {
       iframeDoc.write(invoiceHTML);
       iframeDoc.close();
 
+      // Force @media print styles to apply by injecting a style override
+      // This is necessary because html2canvas doesn't automatically apply print media queries
+      const printStyleOverride = iframeDoc.createElement('style');
+      printStyleOverride.textContent = `
+        /* Force all @media print styles to apply */
+        body { padding: 0 !important; }
+        .invoice-container { border: none !important; }
+        .no-print { display: none !important; }
+        .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
+        .signature-section { page-break-before: avoid !important; }
+        table { page-break-inside: auto !important; }
+        thead { display: table-header-group !important; }
+        tr { page-break-inside: avoid !important; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+      `;
+      iframeDoc.head.appendChild(printStyleOverride);
+
       // Wait for a moment to ensure rendering and painting is complete
       // This fixes the "empty PDF" and "content mismatch" issues caused by race conditions
       await new Promise(resolve => setTimeout(resolve, 800));
