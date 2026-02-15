@@ -120,7 +120,7 @@ const PDFGenerator = {
         <style>
           /* Force print styles for PDF download */
           body { padding: 0 !important; }
-          .invoice-container { border: none !important; padding: 0 !important; }
+          .invoice-container { border: none !important; }
           .no-print { display: none !important; }
           .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
           .signature-section { page-break-before: avoid !important; }
@@ -404,7 +404,7 @@ const PDFGenerator = {
     wrapper.querySelector('.no-print')?.remove();
 
     const opt = {
-      margin: [0, 0, 0, 0], // Reduced margin since CSS likely handles it
+      margin: 5, // 5mm margin to match print styles
       filename: `Invoice_${bill.invoiceNo}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
