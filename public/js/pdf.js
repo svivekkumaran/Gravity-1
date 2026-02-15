@@ -23,7 +23,7 @@ const PDFGenerator = {
   },
 
   // Generate HTML for invoice
-  async generateInvoiceHTML(bill) {
+  async generateInvoiceHTML(bill, isForDownload = false) {
     const settings = await DB.getSettings();
 
     // Provide fallback values to prevent "undefined" in PDF
@@ -115,6 +115,20 @@ const PDFGenerator = {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           }
         </style>
+
+        ${isForDownload ? `
+        <style>
+          /* Force print styles for PDF download */
+          body { padding: 0 !important; }
+          .invoice-container { border: none !important; padding: 0 !important; }
+          .no-print { display: none !important; }
+          .summary-table, .signature-section, .footer { page-break-inside: avoid !important; }
+          .signature-section { page-break-before: avoid !important; }
+          table { page-break-inside: auto !important; }
+          thead { display: table-header-group !important; }
+          tr { page-break-inside: avoid !important; }
+        </style>
+        ` : ''}
       </head>
       <body>
         <div class="invoice-container" id="invoice">
@@ -356,7 +370,7 @@ const PDFGenerator = {
   // Download invoice as PDF
   async downloadInvoice(bill) {
     // Generate HTML
-    const invoiceHTML = await this.generateInvoiceHTML(bill);
+    const invoiceHTML = await this.generateInvoiceHTML(bill, true);
 
     // Create a temporary container
     const container = document.createElement('div');
