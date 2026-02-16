@@ -297,32 +297,57 @@ const ReportsManager = {
                 'Customer Address', 'Customer GSTIN', 'Delivery Address', 'Place of Supply',
                 'Items Count', 'Subtotal', 'CGST', 'SGST', 'IGST',
                 'Discount', 'Transport Vehicle', 'Transport Charge',
-                'Total', 'Amount in Words', 'Billing Notes', 'Billed By'
-            ],
-            // Table Data
-            ...report.bills.map(bill => [
-                bill.invoiceNo,
-                formatDate(bill.date),
-                bill.customerName,
-                bill.customerPhone || '',
-                bill.customerAddress || '',
-                bill.customerGstin || '',
-                bill.deliveryAddress || '',
-                bill.placeOfSupply || '',
-                bill.items.length,
-                bill.subtotal,
-                bill.cgst,
-                bill.sgst,
-                bill.igst || 0,
-                bill.discount || 0,
-                bill.transportVehicleNumber || '',
-                bill.transportCharge || 0,
-                bill.total,
-                bill.amountInWords || '',
-                bill.billingNotes || '',
-                bill.billedBy || 'N/A'
-            ])
+                'Total', 'Amount in Words', 'Billing Notes', 'Billed By',
+                // New Fields
+                'Product Name', 'HSN Code', 'Qty', 'Price', 'GST%', 'GST Amt', 'Item Total'
+            ]
         ];
+
+        // Table Data
+        report.bills.forEach(bill => {
+            bill.items.forEach((item, index) => {
+                const isFirstItem = index === 0;
+
+                // Calculate Item GST
+                const itemSubtotal = item.price * item.qty;
+                const gst = calculateGST(itemSubtotal, item.gstRate);
+                const itemTotal = itemSubtotal + gst.total;
+
+                const row = [
+                    // Bill Details (Only for first item)
+                    isFirstItem ? bill.invoiceNo : '',
+                    isFirstItem ? formatDate(bill.date) : '',
+                    isFirstItem ? bill.customerName : '',
+                    isFirstItem ? (bill.customerPhone || '') : '',
+                    isFirstItem ? (bill.customerAddress || '') : '',
+                    isFirstItem ? (bill.customerGstin || '') : '',
+                    isFirstItem ? (bill.deliveryAddress || '') : '',
+                    isFirstItem ? (bill.placeOfSupply || '') : '',
+                    isFirstItem ? bill.items.length : '',
+                    isFirstItem ? bill.subtotal : '',
+                    isFirstItem ? bill.cgst : '',
+                    isFirstItem ? bill.sgst : '',
+                    isFirstItem ? (bill.igst || 0) : '',
+                    isFirstItem ? (bill.discount || 0) : '',
+                    isFirstItem ? (bill.transportVehicleNumber || '') : '',
+                    isFirstItem ? (bill.transportCharge || 0) : '',
+                    isFirstItem ? bill.total : '',
+                    isFirstItem ? (bill.amountInWords || '') : '',
+                    isFirstItem ? (bill.billingNotes || '') : '',
+                    isFirstItem ? (bill.billedBy || 'N/A') : '',
+
+                    // Item Details (Always present)
+                    item.name,
+                    item.hsnCode || '',
+                    item.qty,
+                    item.price,
+                    item.gstRate + '%',
+                    gst.total.toFixed(2),
+                    itemTotal.toFixed(2)
+                ];
+                csvData.push(row);
+            });
+        });
 
         exportToCSV(csvData, 'sales_report');
     },
