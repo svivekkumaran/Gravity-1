@@ -295,24 +295,43 @@ const ReportsManager = {
             [
                 'Invoice No', 'Date', 'Customer Name', 'Customer Phone',
                 'Customer Address', 'Customer GSTIN', 'Delivery Address', 'Place of Supply',
-                'Items Count', 'Subtotal', 'CGST', 'SGST',
-                'Total',
-                // New Fields
-                'Product Name', 'HSN Code', 'Qty', 'Price', 'GST%', 'GST Amt', 'Item Total'
+                'Items Count',
+                'Product Name', 'HSN Code', 'Qty', 'Price', 'Subtotal', 'GST%', 'CGST', 'SGST', 'GST Amt',
+                'Round Off', 'Grand Total'
             ]
         ];
 
         // Table Data
         report.bills.forEach(bill => {
+            // Calculate Bill-level Round Off if missing
+            let displayRoundOff = 0;
+            let displayTotal = 0;
+
+            // Re-calculate bill totals to ensure accuracy for round off logic
+            const billSubtotal = parseFloat(bill.subtotal) || 0;
+            const billCGST = parseFloat(bill.cgst) || 0;
+            const billSGST = parseFloat(bill.sgst) || 0;
+            const billIGST = parseFloat(bill.igst) || 0;
+            const billTransport = parseFloat(bill.transportCharge) || 0;
+            const totalWithTransport = billSubtotal + billCGST + billSGST + billIGST + billTransport;
+
+            if (bill.roundOff !== undefined && bill.roundOff !== null && !isNaN(parseFloat(bill.roundOff))) {
+                displayRoundOff = parseFloat(bill.roundOff);
+                displayTotal = parseFloat(bill.total) || (totalWithTransport + displayRoundOff);
+            } else {
+                const roundedTotal = Math.round(totalWithTransport);
+                displayRoundOff = roundedTotal - totalWithTransport;
+                displayTotal = roundedTotal;
+            }
+
             bill.items.forEach((item, index) => {
                 const isFirstItem = index === 0;
 
                 // Calculate Item GST
                 const itemSubtotal = item.price * item.qty;
                 const gst = calculateGST(itemSubtotal, item.gstRate);
-                const itemTotal = itemSubtotal + gst.total;
 
-                // Format unit for display (Logic adapted from pdf.js)
+                // Format unit for display
                 let unitDisplay = item.unit || 'units';
                 if (unitDisplay === 'num') unitDisplay = 'Num';
                 else if (unitDisplay === 'bags') unitDisplay = item.qty === 1 ? 'Bag' : 'Bags';
@@ -332,19 +351,21 @@ const ReportsManager = {
                     isFirstItem ? (bill.deliveryAddress || '') : '',
                     isFirstItem ? (bill.placeOfSupply || '') : '',
                     isFirstItem ? bill.items.length : '',
-                    isFirstItem ? bill.subtotal : '',
-                    isFirstItem ? bill.cgst : '',
-                    isFirstItem ? bill.sgst : '',
-                    isFirstItem ? bill.total : '',
 
                     // Item Details (Always present)
                     item.name,
                     item.hsnCode || '',
                     qtyWithUnit,
                     item.price,
+                    itemSubtotal.toFixed(2), // Item Subtotal
                     item.gstRate + '%',
-                    gst.total.toFixed(2),
-                    itemTotal.toFixed(2)
+                    gst.cgst.toFixed(2),     // Item CGST
+                    gst.sgst.toFixed(2),     // Item SGST
+                    gst.total.toFixed(2),    // Item GST Amt
+
+                    // Bill Totals (Only for first item)
+                    isFirstItem ? displayRoundOff.toFixed(2) : '',
+                    isFirstItem ? displayTotal.toFixed(2) : ''
                 ];
                 csvData.push(row);
             });
