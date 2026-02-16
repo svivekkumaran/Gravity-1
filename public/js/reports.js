@@ -295,9 +295,8 @@ const ReportsManager = {
             [
                 'Invoice No', 'Date', 'Customer Name', 'Customer Phone',
                 'Customer Address', 'Customer GSTIN', 'Delivery Address', 'Place of Supply',
-                'Items Count', 'Subtotal', 'CGST', 'SGST', 'IGST',
-                'Discount', 'Transport Vehicle', 'Transport Charge',
-                'Total', 'Amount in Words', 'Billing Notes', 'Billed By',
+                'Items Count', 'Subtotal', 'CGST', 'SGST',
+                'Total',
                 // New Fields
                 'Product Name', 'HSN Code', 'Qty', 'Price', 'GST%', 'GST Amt', 'Item Total'
             ]
@@ -313,6 +312,15 @@ const ReportsManager = {
                 const gst = calculateGST(itemSubtotal, item.gstRate);
                 const itemTotal = itemSubtotal + gst.total;
 
+                // Format unit for display (Logic adapted from pdf.js)
+                let unitDisplay = item.unit || 'units';
+                if (unitDisplay === 'num') unitDisplay = 'Num';
+                else if (unitDisplay === 'bags') unitDisplay = item.qty === 1 ? 'Bag' : 'Bags';
+                else if (unitDisplay === 'units') unitDisplay = item.qty === 1 ? 'Unit' : 'Units';
+                else unitDisplay = unitDisplay.charAt(0).toUpperCase() + unitDisplay.slice(1);
+
+                const qtyWithUnit = `${item.qty} ${unitDisplay}`;
+
                 const row = [
                     // Bill Details (Only for first item)
                     isFirstItem ? bill.invoiceNo : '',
@@ -327,19 +335,12 @@ const ReportsManager = {
                     isFirstItem ? bill.subtotal : '',
                     isFirstItem ? bill.cgst : '',
                     isFirstItem ? bill.sgst : '',
-                    isFirstItem ? (bill.igst || 0) : '',
-                    isFirstItem ? (bill.discount || 0) : '',
-                    isFirstItem ? (bill.transportVehicleNumber || '') : '',
-                    isFirstItem ? (bill.transportCharge || 0) : '',
                     isFirstItem ? bill.total : '',
-                    isFirstItem ? (bill.amountInWords || '') : '',
-                    isFirstItem ? (bill.billingNotes || '') : '',
-                    isFirstItem ? (bill.billedBy || 'N/A') : '',
 
                     // Item Details (Always present)
                     item.name,
                     item.hsnCode || '',
-                    item.qty,
+                    qtyWithUnit,
                     item.price,
                     item.gstRate + '%',
                     gst.total.toFixed(2),
