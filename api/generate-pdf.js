@@ -33,7 +33,6 @@ module.exports = async (req, res) => {
                 source: html,
                 format: 'A4',
                 margin: '5mm',
-                print_background: true,
                 use_print: true
             })
         });
