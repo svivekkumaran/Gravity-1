@@ -1,5 +1,14 @@
 const db = require('../lib/db');
 
+// Returns the start of the Indian financial year (Apr 1) for a given date
+function getFYStart(date) {
+    const d = date ? new Date(date) : new Date();
+    // Month is 0-indexed: 3 = April
+    return d.getMonth() >= 3
+        ? new Date(d.getFullYear(), 3, 1)      // Apr 1 this year
+        : new Date(d.getFullYear() - 1, 3, 1); // Apr 1 last year
+}
+
 // Helper function to convert snake_case to camelCase
 function toCamelCase(obj) {
     if (!obj) return obj;
@@ -49,24 +58,27 @@ module.exports = async (req, res) => {
                     const invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
                     return res.json({ invoiceNo });
                 } else {
-                    // For GST Invoice (type !== ESTIMATE)
-                    // Logic: Get all invoice numbers that are purely numeric
-                    // If found, take max + 1. If not found, start from 415.
+                    // For GST Invoice — scope to the FY of the requested bill date.
+                    // If a backdated bill date is passed (e.g. Mar 31), its FY is
+                    // used so the number comes from the correct series.
+                    const { date: billDate } = req.query; // optional: ?date=YYYY-MM-DD
+                    const fyStart = getFYStart(billDate);
+                    const fyEnd = new Date(fyStart.getFullYear() + 1, 3, 1); // Apr 1 next year
 
-                    const bills = await db.queryAll('SELECT invoice_no FROM bills');
+                    const bills = await db.queryAll(
+                        'SELECT invoice_no FROM bills WHERE date >= $1 AND date < $2',
+                        [fyStart.toISOString(), fyEnd.toISOString()]
+                    );
 
                     let maxNum = 0;
                     for (const bill of bills) {
-                        // Check if invoice_no is numeric
                         if (/^\d+$/.test(bill.invoice_no)) {
                             const num = parseInt(bill.invoice_no, 10);
-                            if (num > maxNum) {
-                                maxNum = num;
-                            }
+                            if (num > maxNum) maxNum = num;
                         }
                     }
 
-                    const nextNum = maxNum > 0 ? maxNum + 1 : 415;
+                    const nextNum = maxNum > 0 ? maxNum + 1 : 1;
                     return res.json({ invoiceNo: String(nextNum) });
                 }
             }
@@ -113,28 +125,23 @@ module.exports = async (req, res) => {
                 }
                 invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
             } else {
-                // GST Invoice Logic
-                // Get max numeric invoice number
-                // We fetch all because checking "IS NUMERIC" in SQL varies by DB (Postgres has regex but strict portable way is tricky without specific function)
-                // However, since we are using 'better-sqlite3' locally or postgres in prod, let's stick to simple logic: select all and parse in JS or use a regex query if possible.
-                // Given the code base seems to support postgres migration, let's try to be efficient.
-                // But typically for invoices, fetching all 'invoice_no' is cheap enough for small businesses.
-                // Or better: SELECT invoice_no FROM bills WHERE invoice_no ~ '^[0-9]+$' ORDER BY length(invoice_no) DESC, invoice_no DESC LIMIT 1 (Postgres specific)
-                // Since this is node js logic, let's reuse the logic we wrote for GET to be safe across DBs if the `db` abstraction allows. 
-                // Wait, previous code used `db.queryOne`. Let's assume standard SQL or do the JS way for safety if `~` isn't supported in sqlite.
-                // Actually, let's keep it simple and consistent with the GET logic.
+                // GST Invoice Logic — scoped to the FY of the bill's actual date.
+                // Backdated bills (e.g. Mar 31) correctly use the old FY series.
+                const fyStart = getFYStart(date); // 'date' comes from req.body
+                const fyEnd = new Date(fyStart.getFullYear() + 1, 3, 1);
 
-                const bills = await db.queryAll('SELECT invoice_no FROM bills');
+                const bills = await db.queryAll(
+                    'SELECT invoice_no FROM bills WHERE date >= $1 AND date < $2',
+                    [fyStart.toISOString(), fyEnd.toISOString()]
+                );
                 let maxNum = 0;
                 for (const bill of bills) {
                     if (/^\d+$/.test(bill.invoice_no)) {
                         const num = parseInt(bill.invoice_no, 10);
-                        if (num > maxNum) {
-                            maxNum = num;
-                        }
+                        if (num > maxNum) maxNum = num;
                     }
                 }
-                const nextNum = maxNum > 0 ? maxNum + 1 : 415;
+                const nextNum = maxNum > 0 ? maxNum + 1 : 1;
                 invoiceNo = String(nextNum);
             }
 
