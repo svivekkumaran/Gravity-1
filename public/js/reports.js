@@ -3,6 +3,8 @@
 // ============================================
 
 const ReportsManager = {
+    currentSalesReport: null,
+
     // Get sales report for date range
     async getSalesReport(startDate, endDate, filterType = 'ALL') {
         const allBills = await DB.getBillsByDateRange(startDate, endDate);
@@ -42,12 +44,48 @@ const ReportsManager = {
     // Render sales report
     async renderSalesReport(startDate, endDate, filterType = 'ALL') {
         const report = await this.getSalesReport(startDate, endDate, filterType);
+        this.currentSalesReport = report;
+        this.filterSalesReport();
+    },
 
-        // Update summary cards
-        document.getElementById('totalBills').textContent = report.totalBills;
-        document.getElementById('totalSales').textContent = formatCurrency(report.totalSales);
-        document.getElementById('totalGST').textContent = formatCurrency(report.totalGST);
-        document.getElementById('netSales').textContent = formatCurrency(report.netSales);
+    // Filter sales report based on search input
+    filterSalesReport() {
+        if (!this.currentSalesReport || !this.currentSalesReport.bills) return;
+
+        const searchInput = document.getElementById('reportSearchFilter');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        const bills = this.currentSalesReport.bills.filter(bill => {
+            if (!searchTerm) return true;
+            const customerName = (bill.customerName || '').toLowerCase();
+            const invoiceNo = (bill.invoiceNo || '').toLowerCase();
+            const customerPhone = (bill.customerPhone || '').toLowerCase();
+            const customerAddress = (bill.customerAddress || '').toLowerCase();
+            const customerGstin = (bill.customerGstin || '').toLowerCase();
+            const hasMatchingItem = bill.items && bill.items.some(item => (item.name || '').toLowerCase().includes(searchTerm));
+
+            return customerName.includes(searchTerm) ||
+                invoiceNo.includes(searchTerm) ||
+                customerPhone.includes(searchTerm) ||
+                customerAddress.includes(searchTerm) ||
+                customerGstin.includes(searchTerm) ||
+                hasMatchingItem;
+        });
+
+        // Update summary cards for filtered bills
+        let totalSales = 0;
+        let totalGST = 0;
+        let totalBills = bills.length;
+
+        bills.forEach(bill => {
+            totalSales += parseFloat(bill.total) || 0;
+            totalGST += (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
+        });
+
+        document.getElementById('totalBills').textContent = totalBills;
+        document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+        document.getElementById('totalGST').textContent = formatCurrency(totalGST);
+        document.getElementById('netSales').textContent = formatCurrency(totalSales - totalGST);
 
         // Render bills table
         const tbody = document.getElementById('salesTableBody');
@@ -100,7 +138,7 @@ const ReportsManager = {
             }
         ];
 
-        populateTable(tbody, report.bills, columns);
+        populateTable(tbody, bills, columns);
     },
 
     // Get stock report
@@ -283,13 +321,39 @@ const ReportsManager = {
 
     // Export report to CSV
     async exportSalesReport(startDate, endDate, filterType = 'ALL') {
-        const report = await this.getSalesReport(startDate, endDate, filterType);
+        const searchInput = document.getElementById('reportSearchFilter');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        let bills = [];
+        if (this.currentSalesReport && this.currentSalesReport.bills) {
+            bills = this.currentSalesReport.bills;
+        } else {
+            const report = await this.getSalesReport(startDate, endDate, filterType);
+            bills = report.bills;
+        }
+
+        const filteredBills = bills.filter(bill => {
+            if (!searchTerm) return true;
+            const customerName = (bill.customerName || '').toLowerCase();
+            const invoiceNo = (bill.invoiceNo || '').toLowerCase();
+            const customerPhone = (bill.customerPhone || '').toLowerCase();
+            const customerAddress = (bill.customerAddress || '').toLowerCase();
+            const customerGstin = (bill.customerGstin || '').toLowerCase();
+            const hasMatchingItem = bill.items && bill.items.some(item => (item.name || '').toLowerCase().includes(searchTerm));
+
+            return customerName.includes(searchTerm) ||
+                invoiceNo.includes(searchTerm) ||
+                customerPhone.includes(searchTerm) ||
+                customerAddress.includes(searchTerm) ||
+                customerGstin.includes(searchTerm) ||
+                hasMatchingItem;
+        });
 
         // Prepare data as Array of Arrays for flexible CSV format
         const csvData = [
             ['Sales Report'],
             [`Report Period: ${formatDate(startDate)} to ${formatDate(endDate)}`],
-            [`Filter: ${filterType}`],
+            [`Filter: ${filterType}${searchTerm ? ` (Search: "${searchTerm}")` : ''}`],
             [], // Empty row
             // Table Headers
             [
@@ -302,7 +366,7 @@ const ReportsManager = {
         ];
 
         // Table Data
-        report.bills.forEach(bill => {
+        filteredBills.forEach(bill => {
             // Calculate Bill-level Round Off if missing
             let displayRoundOff = 0;
             let displayTotal = 0;

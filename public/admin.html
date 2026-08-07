@@ -204,12 +204,18 @@
                     </div>
 
                     <div class="glass-card">
-                        <div class="flex-between mb-3">
+                        <div class="flex-between mb-3" style="align-items: center; gap: 1rem; flex-wrap: wrap;">
                             <h3>Sales Details</h3>
-                            <button class="btn btn-success"
-                                onclick="ReportsManager.exportSalesReport(document.getElementById('reportStartDate').value, document.getElementById('reportEndDate').value, document.getElementById('reportTypeFilter').value)">
-                                Export CSV
-                            </button>
+                            <div class="flex gap-2" style="align-items: center; flex-wrap: wrap;">
+                                <input type="text" class="form-input" id="reportSearchFilter"
+                                    placeholder="Filter by customer, invoice..."
+                                    style="width: 240px; margin-bottom: 0;"
+                                    oninput="ReportsManager.filterSalesReport()">
+                                <button class="btn btn-success"
+                                    onclick="ReportsManager.exportSalesReport(document.getElementById('reportStartDate').value, document.getElementById('reportEndDate').value, document.getElementById('reportTypeFilter').value)">
+                                    Export CSV
+                                </button>
+                            </div>
                         </div>
                         <div class="table-container">
                             <table class="data-table">
