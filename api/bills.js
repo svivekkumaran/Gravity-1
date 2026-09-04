@@ -48,11 +48,11 @@ module.exports = async (req, res) => {
                 const { type } = req.query;
 
                 if (type === 'ESTIMATE') {
-                    const prefix = 'EST';
+                    const prefix = 'KA';
                     const year = new Date().getFullYear();
                     const bills = await db.queryAll(
-                        'SELECT invoice_no FROM bills WHERE invoice_no LIKE $1',
-                        [`${prefix}${year}%`]
+                        'SELECT invoice_no FROM bills WHERE invoice_no LIKE $1 OR invoice_no LIKE $2',
+                        [`${prefix}${year}%`, `EST${year}%`]
                     );
                     const nextNum = bills.length + 1;
                     const invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
@@ -108,20 +108,22 @@ module.exports = async (req, res) => {
             let year = new Date().getFullYear();
 
             if (type === 'ESTIMATE') {
-                prefix = 'EST';
+                prefix = 'KA';
                 // Get next invoice number using MAX to avoid race conditions
                 const result = await db.queryOne(
                     `SELECT invoice_no FROM bills 
-                     WHERE invoice_no LIKE $1 
+                     WHERE invoice_no LIKE $1 OR invoice_no LIKE $2 
                      ORDER BY invoice_no DESC 
                      LIMIT 1`,
-                    [`${prefix}${year}%`]
+                    [`${prefix}${year}%`, `EST${year}%`]
                 );
 
                 let nextNum = 1;
                 if (result && result.invoice_no) {
-                    const lastNum = parseInt(result.invoice_no.replace(`${prefix}${year}`, ''));
-                    nextNum = lastNum + 1;
+                    const lastNum = parseInt(result.invoice_no.replace(/^(KA|EST)\d{4}/, ''));
+                    if (!isNaN(lastNum)) {
+                        nextNum = lastNum + 1;
+                    }
                 }
                 invoiceNo = `${prefix}${year}${String(nextNum).padStart(5, '0')}`;
             } else {
@@ -180,8 +182,9 @@ module.exports = async (req, res) => {
                             // Ideally we should re-fetch max, but for now let's just create a new random-ish one or re-fetch.
                             // Actually, let's just re-run the "fetch max" logic inside the loop? No, that's expensive.
                             // Let's just try incrementing the one we tried.
-                            const currentNum = parseInt(invoiceNo.replace(`${prefix}${year}`, ''));
-                            invoiceNo = `${prefix}${year}${String(currentNum + 1).padStart(5, '0')}`;
+                            const currentNum = parseInt(invoiceNo.replace(/^(KA|EST)\d{4}/, ''));
+                            const nextVal = !isNaN(currentNum) ? currentNum + 1 : 1;
+                            invoiceNo = `${prefix}${year}${String(nextVal).padStart(5, '0')}`;
                         } else {
                             // Retry for GST
                             const currentNum = parseInt(invoiceNo);

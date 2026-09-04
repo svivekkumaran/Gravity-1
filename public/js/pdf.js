@@ -82,7 +82,7 @@ const PDFGenerator = {
     const tamilBlessing = settings.tamilBlessing || '';
 
     // Removed Estimate in the PDF
-    const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
+    const isEstimate = bill.invoiceNo && (bill.invoiceNo.startsWith('KA') || bill.invoiceNo.startsWith('EST'));
     const invoiceTitle = isEstimate ? '' : 'TAX INVOICE';
 
     // Calculate valid values for display

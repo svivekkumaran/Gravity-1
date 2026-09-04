@@ -11,7 +11,7 @@ const ReportsManager = {
 
         // Filter based on type
         const bills = allBills.filter(bill => {
-            const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
+            const isEstimate = bill.invoiceNo && (bill.invoiceNo.startsWith('KA') || bill.invoiceNo.startsWith('EST'));
             if (filterType === 'GST') return !isEstimate;
             if (filterType === 'ESTIMATE') return isEstimate;
             return true; // ALL
@@ -216,7 +216,7 @@ const ReportsManager = {
 
         // Filter out estimates - GST report should ONLY show GST bills
         const bills = allBills.filter(bill => {
-            const isEstimate = bill.invoiceNo && bill.invoiceNo.startsWith('EST');
+            const isEstimate = bill.invoiceNo && (bill.invoiceNo.startsWith('KA') || bill.invoiceNo.startsWith('EST'));
             return !isEstimate; // Only exclude estimates
         });
 
